@@ -1,14 +1,14 @@
 """
     Class for a hawkes process.
 """
-from typing import List
+from typing import List, Dict
 from dataclasses import dataclass
 
 import numpy as np
+import tensorflow as tf
 
 from trajectory import Trajectory
 from kernels import Kernel, State
-
 
 @dataclass
 class Hawkes:
@@ -17,10 +17,14 @@ class Hawkes:
         as the triggering kernel.
 
     """
-    mus: np.ndarray
-    W: np.ndarray #W[i][j] describes influence from event i to j
-    kernel: Kernel #just a single triggering kernel, this is why a kernel shouldn't manage its state
-    states: List[State] #each label gets its own state
+    def __init__(self, mus: tf.Tensor, W: tf.Tensor, kernel: Kernel):
+
+        self._mus: tf.Tensor = mus
+        self._weights: tf.Tensor = W
+        self._kernel: Kernel = kernel
+        #this should be initialized per label
+        self._mus: tf.
+        self._states: List[State] = [State() for _ in range(W.shape[0])]
 
     def sample(self, end_time) -> Trajectory:
         """
@@ -35,28 +39,30 @@ class Hawkes:
         """
         llh: float = 0.
         for segval in self.calcsegllh(traj):
-            llh += segval
+            for score in segval.values():
+                llh += score
 
         return llh
 
-    def calcsegllh(self, traj: Trajectory) -> float:
+    def calcsegllh(self, traj: Trajectory) -> Dict[str, float]:
         """
             :param traj: The trajectory to calculate the log likelihood of
             :return: The log likelihood.
         """
         for label in traj.field["labels"]:
-            self.states[label] = State()
+            self._states[label] = State()
 
         for time, delta, evlabel in traj:
-            segscore = 0
+            segscore = {}
 
             for label in traj.field["labels"]:
-                self.states[label].advancestate(time)
-                self.states[label].addevent(self.W[evlabel][label])
+                self._states[label].advancestate(time)
+                self._states[label].addevent(self._weights[evlabel][label])
+                segscore[label] = 0
 
             for label in traj.field["labels"]:
-                segscore += delta*self.states[label].intensities
+                segscore[label] += delta*self._states[label].intensities
                 if evlabel != -1:
-                    segscore -= np.log(self.states[label].intensities)
+                    segscore[label] -= np.log(self._states[label].intensities)
 
             yield segscore

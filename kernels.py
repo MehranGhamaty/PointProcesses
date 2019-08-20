@@ -4,7 +4,9 @@
 from typing import List
 from abc import ABCMeta, abstractmethod
 from dataclasses import dataclass
+
 from numpy import exp
+import tensorflow as tf
 
 @dataclass
 class State:
@@ -39,7 +41,7 @@ class ExponentialKernel:
         exp{-beta t}
     """
     def __init__(self, beta: float = 1.):
-        self.beta = beta
+        self.beta = tf.Variable(beta, tf.float16)
 
     def advancestate(self, state: State, time: float):
         """ advances the state by decaying the exponential """
@@ -48,7 +50,7 @@ class ExponentialKernel:
         state.intensity = state.intensity * exp(-deltat * self.beta)
 
     @staticmethod
-    def addevent(state: State, scale: float = 1.):
+    def addevent(state: State, scale: tf.float16 = 1.):
         """ adds an event """
         state.intensity += scale
 
@@ -66,7 +68,7 @@ class SumExponentialKernel:
         for k in self._kernels:
             k.advancestate(state, time)
 
-    def addevent(self, scale: float = 1.):
+    def addevent(self, scale: tf.float16 = 1.):
         """ Adds an event """
         for k in self._kernels:
             k.addevent(scale)

@@ -8,7 +8,7 @@ tf.compat.v1.enable_eager_execution()
 
 from trajectory import Field, Trajectory
 from kernels import ExponentialKernel
-from hawkes import Hawkes
+from hawkes2 import Hawkes
 
 LABELS = tf.convert_to_tensor([0, 1], dtype=tf.int32)
 
@@ -21,8 +21,12 @@ FIELDS = {
 TRAJ = Trajectory(FIELDS, tau=1.)
 print(TRAJ)
 
-HP = Hawkes(len(LABELS), ExponentialKernel())
+HP = Hawkes(len(LABELS), ExponentialKernel(3.))
 
 print(HP)
-HP.sgd(0.1, TRAJ)
+for time_slice in TRAJ:
+    with tf.GradientTape() as tape:
+        loss = HP.calcsegllh(time_slice)
+    gradients = tape.gradient(loss, HP.parameters)
+    print("Gradients ", gradients)
 print(HP)

@@ -5,7 +5,6 @@ from typing import List
 from abc import ABCMeta, abstractmethod
 from dataclasses import dataclass
 
-from numpy import exp
 import tensorflow as tf
 
 @dataclass
@@ -14,8 +13,8 @@ class State:
         Captures the state (intensity) and the
         current time.
     """
-    intensity: float = 0
-    time: float = 0
+    intensity: tf.float32 = 0.
+    time: tf.float32 = 0.
 
 class Kernel(metaclass=ABCMeta):
     """ abstract base class for kernels """
@@ -25,13 +24,13 @@ class Kernel(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def advancestate(self, state: State, time: float):
+    def advancestate(self, state: State, time: tf.float32):
         """ advances the state (can use approximations) """
         pass
 
-    @abstractmethod
     @staticmethod
-    def addevent(scale: float):
+    @abstractmethod
+    def addevent(state: State, scale: tf.float32):
         """ Adds an event to increase (or decrease) the intensity """
         pass
 
@@ -40,19 +39,21 @@ class ExponentialKernel:
         Hold the parameter for an exponential kernel
         exp{-beta t}
     """
-    def __init__(self, beta: float = 1.):
-        self.beta = tf.Variable(beta, tf.float16)
+    def __init__(self, beta: tf.float32 = 1.):
+        self.beta = beta
 
-    def advancestate(self, state: State, time: float):
+    def advancestate(self, state: State, time: tf.float32) -> State:
         """ advances the state by decaying the exponential """
         deltat = time - state.time
         state.time = time
-        state.intensity = state.intensity * exp(-deltat * self.beta)
+        state.intensity = state.intensity * tf.math.exp(-deltat * self.beta)
+        return state
 
     @staticmethod
-    def addevent(state: State, scale: tf.float16 = 1.):
+    def addevent(state: State, scale: tf.float32 = 1.) -> State:
         """ adds an event """
         state.intensity += scale
+        return state
 
 class SumExponentialKernel:
     """
@@ -68,7 +69,7 @@ class SumExponentialKernel:
         for k in self._kernels:
             k.advancestate(state, time)
 
-    def addevent(self, scale: tf.float16 = 1.):
+    @staticmethod
+    def addevent(state: State, scale: tf.float16 = 1.):
         """ Adds an event """
-        for k in self._kernels:
-            k.addevent(scale)
+        state.intensity += scale

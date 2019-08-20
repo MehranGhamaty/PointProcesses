@@ -7,13 +7,25 @@ from dataclasses import dataclass, field
 from numpy import inf
 
 @dataclass
+class TimeSlice:
+    """
+        Each of these serves as an example for the dataset.
+    """
+    time: float #the end time of the slice
+    deltat: float # the duration of the slice
+    label: int # if -1 no event occured
+
+@dataclass
 class Field:
     """
         These hold the value for the field and the range
     """
-    values: List[Union[float, int]] = field(default_factory=list())
+    values: List[Union[float, int]] = field(default_factory=list)
     continuous: bool = True
     space: Union[Set[int], Tuple[float, float]] = (0., 0.)
+
+    def __len__(self):
+        return len(self.values)
 
 class Trajectory:
     """
@@ -36,37 +48,41 @@ class Trajectory:
 #assert times[0] >= duration[0], "There are events that occur before the time range"
 #assert times[-1] <= duration[1], "There are events that occur after the range"
 
-        self._fields = dict()
+        self.__fields = dict()
         for key, val in fields.items():
-            self._fields[key] = Field(continuous=val.continuous, space=val.space)
+            self.__fields[key] = Field(continuous=val.continuous, space=val.space)
 
-        currtime = self._fields["times"].space[0]
+        currtime = self.__fields["times"].space[0]
         for time, label in zip(fields["times"].values, fields["labels"].values):
             timeuntilnextevent = time - currtime
             while timeuntilnextevent > tau:
                 timeuntilnextevent -= tau
                 self._addevent((tau, -1))
             self._addevent((timeuntilnextevent, label))
-
         self._totaltime = 0
         self._i = 0
 
     def _addevent(self, event: Tuple[float, int]):
         """ Adds an event to the trajectory """
-        self._fields["times"].values.append(event[0])
-        self._fields["labels"].values.append(event[1])
+        self.__fields["times"].values.append(event[0])
+        self.__fields["labels"].values.append(event[1])
+
     @property
     def field(self) -> Dict[str, Field]:
         """ Returns the fields """
-        return self._fields
+        return self.__fields
+
     def __iter__(self):
         return self
-    def __next__(self) -> Tuple[float, float, int]:
-        if self._i >= len(self._fields["times"]):
+    def __next__(self) -> TimeSlice:
+        if self._i >= len(self.__fields["times"]):
             raise StopIteration
         else:
-            time = self._fields["times"].values[self._i]
-            label = self._fields["labels"].values[self._i]
+            time = self.__fields["times"].values[self._i]
+            label = self.__fields["labels"].values[self._i]
             self._totaltime += time
             self._i += 1
-            return (self._totaltime, time, label)
+            return TimeSlice(time=self._totaltime, deltat=time, label=label)
+
+    def __repr__(self):
+        return self.__fields.__repr__()

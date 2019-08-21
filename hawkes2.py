@@ -34,12 +34,10 @@ class Hawkes:
             Output is going to be the intensities
         """
         #self._states = [self._kernel.advancestate(s, time_slice.time) for s in self._states]
-        if time_slice.label != -1:
-            self._states = [self._kernel.addevent(s, self._weights[time_slice.label][i])
-                            for i, s in enumerate(self._states)]
+        if time_slice.event:
+            self._states += self._weights[time_slice.label]
 
-        intensities = self._mus + tf.convert_to_tensor(
-            [state.intensity for state in self._states], dtype=tf.float32)
+        intensities = self._mus + self._states
 
         return intensities
 

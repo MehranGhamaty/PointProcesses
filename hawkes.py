@@ -11,6 +11,7 @@ from kernels import Kernel, State
 class Hawkes:
     """
 	A general multivariate Hawkes process that uses a sum of exponentials
+        ONLY 1 EXP atm
     """
     def __init__(self, nlabels: int, kernel: Kernel):
         self._kernel: Kernel = kernel
@@ -42,7 +43,6 @@ class Hawkes:
         for segval in self.calcsegllh(traj):
             for score in segval.values():
                 llh += score
-
         return llh
 
     def calcsegllh(self, traj: Trajectory) -> tfe.Variable:

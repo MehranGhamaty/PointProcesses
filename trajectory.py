@@ -23,7 +23,7 @@ class Field:
     values: List[Union[float, int]] = field(default_factory=list)
     continuous: bool = True
     space: Union[Set[int], Tuple[float, float]] = (0., 0.)
-
+    
     def __len__(self):
         return len(self.values)
 
@@ -74,8 +74,10 @@ class Trajectory:
 
     def __iter__(self):
         return self
+
     def __next__(self) -> TimeSlice:
         if self._i >= len(self.__fields["times"]):
+            self._i = 0
             raise StopIteration
         else:
             time = self.__fields["times"].values[self._i]

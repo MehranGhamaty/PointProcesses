@@ -8,8 +8,7 @@ import matplotlib.pyplot as plt
 tf.compat.v1.enable_eager_execution()
 
 from trajectory import Field, Trajectory
-from kernels import ExponentialKernel
-from hawkes2 import Hawkes
+from hawkes import Hawkes
 
 LABELSET = tf.convert_to_tensor([0, 1], dtype=tf.int32)
 
@@ -20,7 +19,8 @@ FIELDS = {
     "labels" : Field(values=LABELS, continuous=False, space=LABELSET)
 }
 TRAJ = Trajectory(FIELDS, tau=1.)
-#print(TRAJ)
+print(TRAJ)
+
 
 HP = Hawkes(len(LABELSET), [1, 3, 4] )
 eta = 0.1
@@ -34,7 +34,8 @@ for epoch in range(2):
     for time_slice in TRAJ:
         print("time slice ", time_slice)
         with tf.GradientTape() as tape:
-            llh = HP.calcsegllh(time_slice)
+            ints = HP(time_slice)
+            llh = HP.calcsegllh(ints, time_slice)
         gradients = tape.gradient(llh, HP.parameters)
         print("gradients", gradients)
         print("log likelihood is ", llh)
@@ -44,17 +45,10 @@ for epoch in range(2):
         #it seems like 
 
     score.append(totalllh)
+    print(score)
+exit(1)
 
 print("DONE LEARNING")
-
-finalllh = 0
-for time_slice in TRAJ:
-    finalllh += HP.calcsegllh(time_slice)
-    break
-print(finalllh)
-
-
-
 print(score)
 
 

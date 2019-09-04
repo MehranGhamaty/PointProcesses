@@ -57,7 +57,7 @@ while len(scores) < 10:
             # print(ints)
             llh = HP.calcsegnegllh(ints, time_slice)
         gradients = tape.gradient(llh, HP.parameters)
-        print(gradients)
+        #print(gradients)
         totalllh += llh
         HP.applygradients(eta, gradients[0], gradients[1])
     # print(totalllh)
@@ -80,4 +80,12 @@ for it, time in enumerate(times):
     plt.plot(time, intensities1[it])
     plt.scatter(x, [v*1 for v in y])
     plt.pause(0.5)
-    plt.close()
+
+
+plt.plot(time, intensities0[-1])
+plt.plot(time, intensities1[-1])
+plt.scatter(x, [v*1 for v in y])
+plt.xlabel("Time")
+plt.ylabel("Intensities")
+plt.title("Example fit to synthetic data with two labels")
+plt.savefig('intensities.pdf')

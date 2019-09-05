@@ -2,7 +2,7 @@
 
 from setuptools import setup, find_packages
 
-setup(name='PointProcesses', version='0.05a',
+setup(name='PointProcesses', version='0.06a',
       description="Implementation of various point processes",
       author="Mehran N. Ghamaty",
       author_email="mnghamaty@gmail.com",

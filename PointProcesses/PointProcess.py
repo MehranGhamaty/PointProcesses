@@ -7,8 +7,7 @@ from abc import ABCMeta, abstractmethod
 import tensorflow as tf
 from numpy import inf
 
-from Trajectory.TimeSlice import TimeSlice
-from Trajectory.Trajectory import Trajectory
+from DataStores.Trajectory import Trajectory, TimeSlice
 
 class PointProcess(metaclass=ABCMeta):
     """

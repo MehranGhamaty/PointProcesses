@@ -5,6 +5,8 @@ of temporal point process.
 This is built using TensorFlow for its automatic differentiation, along with
 typing to catch bugs.
 
+Scipy is used to fit distributions at the leaves of the PCIM (how exactly do I do this...).
+
 So far only a multivariate Hawkes process with static base rate and a sum of
 exponential triggering kernels is the only model. It has gradient ascent along
 with sampling implemented.
@@ -12,18 +14,16 @@ with sampling implemented.
 This work is the composition of a few papers along with previous implementations
 of Hawkes process, bayesian networks, and PCIMs.
 
-## TODO
-
-* Make the example note books
-* I want an implementation of SIP along with PCIM.
-* I need real data to test on.
-
 # Tasks
 
-A side point of this project is to compare these models to other things for
-predictions. Identifying tasks is part of this project; specifically extending
-these models from just temporal point processes to be used on images or in
-natural language processing.
+I want to use these models for NLP. What tasks are associated with that?
+What can I be using to compare? How do I set up a data pipeline for it?
+What is my purpose?
+
+I need to get my computer in here along with a desk. Whats the purpose of anything?
+
+Most people can't be in relationships with younger people because they look too old.
+If I have enough money I can solve that issue.
 
 # Install
 
@@ -42,8 +42,7 @@ import tensorflow as tf
 
 tf.enable_eager_execution()
 
-from Trajectory.Trajectory import Trajectory
-from Trajectory.Field import Field
+from DataStores.Trajectory import Trajectory, Field
 
 label_set = tf.convert_to_tensor([0, 1], dtype=tf.int32)
 times = tf.convert_to_tensor([1., 2.5, 5, 9.], dtype=tf.float32)
@@ -60,7 +59,7 @@ An example for creating a Hawkes process, estimating parameters, and sampling
 can be seen below.
 
 ```python
-From Hawkes.Hawkes import Hawkes
+From PointProcesses.Hawkes import Hawkes
 
 exponential_params = [1, 3, 5]
 hp = Hawkes(len(label_set), exponential_params)

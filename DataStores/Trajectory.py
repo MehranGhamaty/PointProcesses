@@ -14,14 +14,35 @@
     An Episodes object manages a set of Trajectories.
 """
 import functools
+from dataclasses import dataclass, field
 
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Union, Set
 from numpy import inf
 
-from Trajectory.Field import Field
-from Trajectory.TimeSlice import TimeSlice
-
 import tensorflow as tf
+
+@dataclass
+class TimeSlice:
+    """
+        Each of these serves as an example for the dataset.
+    """
+    time: tf.constant  # the end time of the slice
+    deltat: tf.constant  # the duration of the slice
+    label: tf.constant  # if -1 no event occured
+
+
+@dataclass
+class Field:
+    """
+        These hold the value for the field and the range
+    """
+    values: List[Union[float, int]] = field(default_factory=list)
+    continuous: bool = True
+    space: Union[Set[int], Tuple[float, float]] = (0., 0.)
+
+    def __len__(self):
+        return len(self.values)
+
 
 class Trajectory:
     """

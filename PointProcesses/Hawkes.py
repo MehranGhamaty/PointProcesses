@@ -13,11 +13,11 @@ from numpy import inf
 
 import tensorflow as tf
 
-from Trajectory.Trajectory import Trajectory
-from Trajectory.TimeSlice import TimeSlice
-from Trajectory.Field import Field
+from PointProcesses.PointProcess import PointProcess
 
-class Hawkes:
+from DataStores.Trajectory import Trajectory, TimeSlice, Field
+
+class Hawkes(PointProcess):
     """
        A general multivariate Hawkes process that uses a sum of exponentials
        Non-modular kernel. Some methods manage state, be aware.
@@ -25,34 +25,34 @@ class Hawkes:
        Assumes labels are from the space [0, nlabels)
     """
     def __init__(self, nlabels: int, betas: List[int]):
-        self._nlabels: int = nlabels
-        self._nkernels: int = len(betas)
+        self.__nlabels: int = nlabels
+        self.__nkernels: int = len(betas)
 
-        self._betas = tf.reshape(tf.Variable(
+        self.__betas = tf.reshape(tf.Variable(
             initial_value=betas,
-            dtype=tf.float32, trainable=True), (1, self._nkernels))
+            dtype=tf.float32, trainable=True), (1, self.__nkernels))
 
         # I need better ways of initializing these....
         # mu should make sure everthing is always positive....
         # constraints..... I really feel like using the lagrangian would be better than other
         # other methods I've seen.....
 
-        self._weights: tf.Variable = tf.Variable(
-            initial_value=tf.random.uniform((self._nlabels, self._nlabels, self._nkernels),
+        self.__weights: tf.Variable = tf.Variable(
+            initial_value=tf.random.uniform((self.__nlabels, self.__nlabels, self.__nkernels),
                                             minval=0.001, maxval=1),
             dtype=tf.float32, trainable=True)
 
-        self._mus: tf.Variable = tf.Variable(
-            initial_value=tf.random.uniform((self._nlabels,),
+        self.__mus: tf.Variable = tf.Variable(
+            initial_value=tf.random.uniform((self.__nlabels,),
                                             minval=0.001, maxval=1),
             dtype=tf.float32, trainable=True)
 
         # each label and each kernel has its own state (used for tracking parents)
-        self._states: tf.Tensor = tf.zeros((self._nlabels, self._nkernels))
-        self._currtime: float = 0  # used in sampling
+        self.__states: tf.Tensor = tf.zeros((self.__nlabels, self.__nkernels))
+        self.__currtime: float = 0  # used in sampling
 
     def __repr__(self):
-        return "{}\n{}\n".format(self._weights, self._mus)
+        return "{}\n{}\n".format(self.__weights, self.__mus)
 
 
     def __call__(self, time_slice: TimeSlice) -> tf.Tensor:
@@ -60,17 +60,17 @@ class Hawkes:
             Output is going to be the intensities
         """
         # decay the intensity
-        self._states = tf.multiply(self._states,
-                                   tf.exp(-time_slice.deltat * self._betas))
+        self.__states = tf.multiply(self.__states,
+                                   tf.exp(-time_slice.deltat * self.__betas))
 
         # this adds to the intensities
-        self._states = tf.cond(time_slice.label != -1,
-                               lambda: self._states +
-                               self._weights[time_slice.label],
-                               lambda: self._states)
-        # print("state values ", self._states)
-        # self._states = tf.nn.relu(self._states)  # remove negative values
-        return tf.add(self._mus, tf.reduce_sum(self._states, axis=1))
+        self.__states = tf.cond(time_slice.label != -1,
+                               lambda: self.__states +
+                               self.__weights[time_slice.label],
+                               lambda: self.__states)
+        # print("state values ", self.__states)
+        # self.__states = tf.nn.relu(self.__states)  # remove negative values
+        return tf.add(self.__mus, tf.reduce_sum(self.__states, axis=1))
 
     def getsupp(self) -> tf.Tensor:
         """
@@ -78,39 +78,39 @@ class Hawkes:
             Doesn't change the actual state, it just returns
             the total intensity as if an event of each time occured
         """
-        return tf.reduce_sum(self._mus) + \
-               tf.reduce_sum(self._states) + \
-               tf.reduce_sum(self._weights)
+        return tf.reduce_sum(self.__mus) + \
+               tf.reduce_sum(self.__states) + \
+               tf.reduce_sum(self.__weights)
         # I'm not a 100% on that
 
 
     def resetstate(self):
         """ sets the state to 0 """
-        self._states: tf.Tensor = tf.zeros((self._nlabels, self._nkernels))
-        self._currtime = 0
+        self.__states: tf.Tensor = tf.zeros((self.__nlabels, self.__nkernels))
+        self.__currtime = 0
 
     @property
     def parameters(self):
         """ gets all the trainable parameters """
-        return [self._weights, self._mus]
+        return [self.__weights, self.__mus]
 
     @property
     def state(self):
         """ returns the state of each variable """
-        return tf.add(self._mus, tf.reduce_sum(self._states, axis=1))
+        return tf.add(self.__mus, tf.reduce_sum(self.__states, axis=1))
 
     def setparams(self, newweights, newmu):
         """ assigns new values """
-        tf.compat.v1.assign(self._weights, newweights)
-        tf.compat.v1.assign(self._mus, newmu)
+        tf.compat.v1.assign(self.__weights, newweights)
+        tf.compat.v1.assign(self.__mus, newmu)
 
     def applygradients(self, eta, weightgrad, mugrad):
         """ applies updates with a step size """
-        tf.compat.v1.assign_sub(self._weights, eta * weightgrad)
-        tf.compat.v1.assign_sub(self._mus, eta * mugrad)
+        tf.compat.v1.assign_sub(self.__weights, eta * weightgrad)
+        tf.compat.v1.assign_sub(self.__mus, eta * mugrad)
 
-        tf.compat.v1.assign(self._weights, tf.nn.relu(self._weights))
-        tf.compat.v1.assign(self._mus, tf.nn.relu(self._mus))
+        tf.compat.v1.assign(self.__weights, tf.nn.relu(self.__weights))
+        tf.compat.v1.assign(self.__mus, tf.nn.relu(self.__mus))
 
     def calcsegnegllh(self, intensities, time_slice: TimeSlice) -> tf.Variable:
         """
@@ -178,8 +178,8 @@ class Hawkes:
                                            dtype=tf.float32)
 
             deltat = - tf.math.log(to_inverse) / lambdabar
-            self._currtime += deltat
-            intensities = self(TimeSlice(time=self._currtime, deltat=deltat,
+            self.__currtime += deltat
+            intensities = self(TimeSlice(time=self.__currtime, deltat=deltat,
                                          label=-1))
 
             totalint = tf.reduce_sum(intensities)
@@ -196,7 +196,7 @@ class Hawkes:
                     sellabel += 1
                     labelrng -= intensities[sellabel]
                 mylab = tf.constant(sellabel, dtype=tf.int32)
-                yield TimeSlice(time=self._currtime, deltat=deltat, label=mylab)
+                yield TimeSlice(time=self.__currtime, deltat=deltat, label=mylab)
 
     def sample(self, max_time: float, tau: float = inf) -> Trajectory:
         """
@@ -206,7 +206,7 @@ class Hawkes:
         traj = Trajectory({"times" : Field(values=[], continuous=True, space=(0, max_time)),
                            "labels" : Field(values=[], continuous=False,
                                             space=tf.convert_to_tensor(
-                                                [i for i in range(self._nlabels)]))},
+                                                [i for i in range(self.__nlabels)]))},
                           tau=tau)
         self.resetstate()
         for time_slice in self.sample_next_event():

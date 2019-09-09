@@ -12,15 +12,16 @@
 
 """
 from abc import ABCMeta, abstractmethod
-from typing import Optional, List
-from dataclasses import dataclass
-from numpy import log, inf
+from typing import Optional, List, Tuple
+from dataclasses import dataclass, field
 
 import tensorflow as tf
+import numpy as np
 
-from PointProcesses.PointProcess import PointProcess
+from PointProcess import PointProcess
+from HomogeneousPoissonProcess import HomogeneousPoissonProcess
 
-from Trajectory.Trajectory import Trajectory, TimeSlice
+from DataStores.Trajectory import Trajectory, TimeSlice
 
 class BasisFunction(metaclass=ABCMeta):
     """
@@ -29,6 +30,7 @@ class BasisFunction(metaclass=ABCMeta):
         These all have an internal state (for online learning its better to
         keep track of everything).
     """
+    @abstractmethod
     def __init__(self, *args, **kwargs):
         pass
 
@@ -37,6 +39,10 @@ class BasisFunction(metaclass=ABCMeta):
         """
             Takes a list of (ordered) time slices
         """
+
+    @abstractmethod
+    def eval(self) -> bool:
+        """ gets the current state """
 
     @abstractmethod
     def __repr__(self):
@@ -57,11 +63,12 @@ class CountBasisFunction(BasisFunction):
         if label == -1 then its if any type
     """
     def __init__(self, label, lag0, lag1, n):
-        assert(lag0 > lag1)
-        self._labelofinterest = label
-        self._lag0 = lag0
-        self._lag1 = lag1
-        self._n = n
+        assert lag0 > lag1
+        super(CountBasisFunction, self).__init__()
+        self.__labelofinterest = label
+        self.__lag0 = lag0
+        self.__lag1 = lag1
+        self.__n = n
         self.__currnumber = 0
         self.__queue = []
 
@@ -73,37 +80,209 @@ class CountBasisFunction(BasisFunction):
 
         while self.__queue[0].time < self.__queue[-1].time - self.__lag1:
             del self.__queue[0]
+
+        self.__currnumber = len(self.__queue)
+
+        while self.__queue[self.__currnumber-1] - time_slice.time < self.__lag0:
             self.__currnumber -= 1
 
+        return self.eval()
 
+    def eval(self):
+        """
+            gets the current state
+        """
+        return self.__currnumber > self.__n
+
+    def resetstate(self):
+        self.__queue = []
+        self.__currnumber = 0
+
+    def __repr__(self):
+        return "More than {} events of type {} in the past [{}, {}]?".format(
+            self.__n, self.__labelofinterest, self.__lag1, self.__lag0)
+
+class BasisFunctionBank:
+    """
+        Manages tests
+        and the scores associated with
+        each basis function so far.
+
+        Takes a variable and counts
+
+        There is a problem with this....
+        I can have default sizes.....
+    """
+    def __init__(self, variables_and_counts: Dict[int, List[int]],
+                 time_windows: List[Tuple[float, float]]):
+        self.__variables_and_counts = variables_and_counts
+        self.__time_windows = time_windows
+        self.__basis_functions: List[BasisFunction] = \
+            self._generate_basis_function(self.__variables_and_counts, self.__time_windows)
+        self.__segments: List[Tuple[List[TimeSlice], List[TimeSlice]]] = \
+            [(list(), list()) for _ in len(self.__basis_functions)]
+        self.__counts: List[Tuple[int, int]] = [(0,0) for _ in len(self.__basis_functions)]
+        self.__timeamounts: List[Tuple[float, float]] = [(0., 0.) for _ in len(self.__basis_functions)]
+        self.__scores: List[Tuple[float, float]] = [(0., 0.) for _ in len(self.__basis_functions)]
+        self.__i: int = 0
+        self.__highest: int = -1
+        self.__secondhighest: int = -1
+
+    def _generate_basis_function(self, variables_and_counts: Dict[int, List[int]],
+                                 time_windows: List[Tuple[float, float]]) -> List[BasisFunction]:
+        """ Generates basis functions """
+        return []
+
+    @property
+    def highest(self) -> BasisFunction:
+        """ returns the higest scoring basis function """
+        return self.__basis_functions[self.__highest]
 
 
     def resetstate(self):
+        """
+            Resets the internal state of the testbank
+        """
+        self.__segments = [(list(), list()) for _ in len(self.__basis_functions)]
+        self.__counts = [(0, 0) for _ in len(self.__basis_functions)]
+        self.__timeamounts = [(0., 0.) for _ in len(self.__basis_functions)]
+        self.__scores = [(0., 0.) for _ in len(self.__basis_functions)]
+        self.__i = 0
+        self.__highest = -1
+        self.__secondhighest = -1
 
+    def add_time_slice(self, time_slice: TimeSlice) -> tf.Tensor:
+        """
+            adds a time slice to each bank and returns a tensor
+            that contains the score per item that changed
+        """
+        for i, basis_fun in enumerate(self.__basis_functions):
+            """
+                So for each item I call it and it returns true and false
+                That is for each basis function I need to keep track
+                the time_slices that go into the true and false
+                branches. I also need to keep track of each scores
+            """
+            evaluation = basis_fun(time_slice)
+            self.__segments[i][evaluation].append(time_slice)
+            self.__timeamounts[i][evaluation] += time_slice.deltat
+            if time_slice.label != -1:
+                self.__counts[i][evaluation] += 1
 
-@dataclass
-class PCIMNode:
+            """
+            I would need to recalc all the true and false branches
+             to get the llh and thats what checks if its done.
+             the llh is then
+             n * log(n/t) - t * n/t
+             n * log(n/t) - n
+             (this is for just llh....)
+
+             for each side
+            """
+            n = self.__counts[i][evaluation]
+            t = self.__timeamounts[i][evaluation]
+            self.__scores[i][evaluation] =  n * np.log(n/t) - n
+
+            totalscore = self.__scores[i][0] + self.__scores[i][1]
+            highscore = self.__scores[self.__highest][0] + self.__scores[self.__highest][1]
+            if totalscore > highscore:
+                self.__highest = i
+            elif (totalscore >
+                  self.__scores[self.__secondhighest][0] + self.__scores[self.__secondhighest][1]):
+                self.__secondhighest = i
+
+        scores = [p[0] + p[1] for p in self.__scores]
+        return tf.convert_to_tensor(scores, tf.Tensor)
+
+    def checkdone(self, delta) -> bool:
+        """
+            Checks to see if the top scoring item is
+            far enough ahead of the second top scoring item
+        """
+        return self.__highest > self.__secondhighest + delta
+
+    def __iter__(self):
+        """ to iterate through all the basis functions """
+        return self
+
+    def __next__(self) -> BasisFunction:
+        if self.__i >= len(self.__basis_functions):
+            self.__i = 0
+            raise StopIteration
+        self.__i += 1
+        return self.__basis_functions[self.__i]
+
+class DTNode:
     """
-        This is the PCIM Node which contains some PointProcess at its leaves.
+        This is the DT Node which contains some PointProcess at its leaves.
+
     """
-    basis_function: Optional[BasisFunction]
-    distribution: Optional[PointProcess]
-    time_slices = List[TimeSlice]
+    def __init__(self, variables_and_counts: Dict[int, List[int]],
+                time_windows: List[Tuple[float, float]],
+                delta: float = 10.):
+        self.__variables_and_counts = variables_and_counts
+        self.__time_windows = time_windows
+        self.__delta = delta
+        self.__bank: BasisFunctionBank = BasisFunctionBank(self.__variables_and_counts, self.__time_windows)
+        self.__time_slices: List[TimeSlice] = list()
+        self.__basis_function: Optional[BasisFunction] = None
+        self.__distribution: PointProcess = HomogeneousPoissonProcess(len(self.__variables))
+        self.__done: bool = False
+        self.__branches: Optional[List[DTNode]] = None
 
+    def resetstate(self):
+        """
+            Resets the internal state
+        """
+        self.__bank = BasisFunctionBank(self.__variables_and_counts, self.__time_windows)
+        self.__time_slices = list()
+        self.__basis_function = None
+        self.__distribution = HomogeneousPoissonProcess(len(self.__variables))
+        self.__done = False
+        self.__branches = None
 
-class PCIM(PointProcess):
+    def add_time_slice(self, time_slice: TimeSlice) -> tf.Tensor:
+        """
+            add time slice to each test and update all the scores
+
+            returns the intensities from the processes at leaves
+        """
+        if self.__done:
+            """
+                I need to check to see where this time_slice
+                goes
+            """
+            evaluation = self.__basis_function(time_slice)
+            self.__branches[evaluation].add_time_slice(time_slice)
+        else:
+            self.__bank.add_time_slice(time_slice)
+            self.check_if_done()
+
+    def check_if_done(self):
+        """
+            checks to see if the highest score has a far enough lead
+        """
+        if self.__bank.check_if_done(self.__delta):
+            self.__done = True
+            self.__basis_function = self.__bank.highest
+            self.__branches = [DT(self.__nl)]
+
+    def freeze(self):
+        """
+            sets done to true
+        """
+        self.__done = True
+
+class DT(PointProcess):
     """
         This class manges a structure of PCIMNodes.
 
         It keeps track of the root node, the total times,
         along with all the leaves.
     """
-    def __init__(self, nlabels):
-        self.__nlabels = nlabels
-        self.__root: PCIMNode = PCIMNode()
-
-        # Internal State Variables
-        self.__total_time = 0
+    def __init__(self, nlabels: List[int], testbank: BasisFunctionBank):
+        super(DT, self).__init__()
+        self.resetstate()
 
     def resetstate(self):
         """
@@ -111,12 +290,16 @@ class PCIM(PointProcess):
         """
         #for leaf in self.__leaves:
         #   leaf.resetstate()
+        self.__testbank = testbank
+        self.__nlabels = nlabels
+        self.__root: PCIMNode = PCIMNode()
         self.__total_time = 0
+        self.__leaves: [self.__root]
 
     def calcllh(self, traj: Trajectory) -> tf.Variable:
         """
             calculates the log likelihood over the entire
-            trajectory
+            trajectory.
         """
 
     def __call__(self, time_slice: TimeSlice) -> tf.Variable:

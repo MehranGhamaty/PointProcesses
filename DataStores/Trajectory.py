@@ -155,18 +155,18 @@ class Episodes:
     """ Contains a list of trajectories """
 
     def __init__(self, trajs: List[Trajectory]):
-        self._trajs = trajs
-        self._i = 0
-        self._totaltime = functools.reduce(lambda tot, t: tot + t.totaltime, trajs, 0)
-        self._nevents = dict()
-        self._totalnevents = 0
+        self.__trajs = trajs
+        self.__i = 0
+        self.__totaltime = functools.reduce(lambda tot, t: tot + t.totaltime, trajs, 0)
+        self.__nevents = dict()
+        self.__totalnevents = 0
 
         for traj in trajs:
             for label, count in traj.numevents.items():
-                if label not in self._nevents:
-                    self._nevents[label] = 0
-                self._nevents[label] += count
-                self._totalnevents += count
+                if label not in self.__nevents:
+                    self.__nevents[label] = 0
+                self.__nevents[label] += count
+                self.__totalnevents += count
 
     @property
     def totaln(self):
@@ -187,8 +187,8 @@ class Episodes:
         return self
 
     def __next__(self) -> Trajectory:
-        if self._i >= len(self._trajs):
-            self._i = 0
+        if self.__i >= len(self.__trajs):
+            self.__i = 0
             raise StopIteration
-        self._i += 1
-        return self._trajs[self._i]
+        self.__i += 1
+        return self._trajs[self.__i]

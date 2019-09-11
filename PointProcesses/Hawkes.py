@@ -60,16 +60,26 @@ class Hawkes(PointProcess):
         """
         # decay the intensity
         self.__states = tf.multiply(self.__states,
-                                   tf.exp(-time_slice.deltat * self.__betas))
+                                    tf.exp(-time_slice.deltat * self.__betas))
 
         # this adds to the intensities
         self.__states = tf.cond(time_slice.label != -1,
-                               lambda: self.__states +
-                               self.__weights[time_slice.label],
-                               lambda: self.__states)
+                                lambda: self.__states +
+                                self.__weights[time_slice.label],
+                                lambda: self.__states)
         # print("state values ", self.__states)
         # self.__states = tf.nn.relu(self.__states)  # remove negative values
         return tf.add(self.__mus, tf.reduce_sum(self.__states, axis=1))
+
+    def check_add(self, states: tf.Tensor, time_slice: TimeSlice) -> tf.Tensor:
+        """
+            Returns a tensor that represents the new state
+        """
+        states = tf.multiply(states, tf.exp(-time_slice.deltat * self.betas))
+        states = tf.cond(time_slice.label != -1,
+                         lambda: self.__states + self.__weights[time_slice.label],
+                         lambda: self.__states)
+        return states
 
     def getsupp(self) -> tf.Tensor:
         """
@@ -97,6 +107,11 @@ class Hawkes(PointProcess):
     def state(self):
         """ returns the state of each variable """
         return tf.add(self.__mus, tf.reduce_sum(self.__states, axis=1))
+
+    @property
+    def stable(self):
+        """ returns true if spectral radius is less than 1 """
+        return True
 
     def setparams(self, newweights, newmu):
         """ assigns new values """
@@ -169,7 +184,10 @@ class Hawkes(PointProcess):
             given that the current state is correct, sample the next
             TimeSlice
             First we get the time until next event;
+
         """
+        states: tf.Tensor = tf.zeros((self.__nlabels, self.__nkernels))
+
         while True:
             lambdabar = self.getsupp()
             to_inverse = tf.random.uniform([1],
@@ -178,8 +196,11 @@ class Hawkes(PointProcess):
 
             deltat = - tf.math.log(to_inverse) / lambdabar
             self.__currtime += deltat
-            intensities = self(TimeSlice(time=self.__currtime, deltat=deltat,
-                                         label=-1))
+
+            tmp_states = self.check_add(states, TimeSlice(time=self.__currtime, deltat=deltat,
+                                                          label=-1))
+
+            intensities = tf.add(self.__mus, tf.reduce_sum(tmp_states, axis=1))
 
             totalint = tf.reduce_sum(intensities)
             reject = tf.random.uniform([1],
@@ -194,8 +215,11 @@ class Hawkes(PointProcess):
                 while labelrng > 0:
                     sellabel += 1
                     labelrng -= intensities[sellabel]
+
                 mylab = tf.constant(sellabel, dtype=tf.int32)
-                yield TimeSlice(time=self.__currtime, deltat=deltat, label=mylab)
+                time_slice = TimeSlice(time=self.__currtime, deltat=deltat, label=mylab)
+                states = self.check_add(states, time_slice)
+                yield time_slice
 
     def sample(self, max_time: float, tau: float = inf) -> Trajectory:
         """

@@ -20,7 +20,6 @@ class PointProcess(metaclass=ABCMeta):
         """
             Initializes the process
         """
-        
 
     @abstractmethod
     def __call__(self, time_slice: TimeSlice) -> tf.Tensor:
@@ -41,6 +40,13 @@ class PointProcess(metaclass=ABCMeta):
             Calculates the log likelihood of a trajectory
         """
 
+    @abstractmethod
+    def sample_next_event(self) -> TimeSlice:
+        """
+            Generates a new event
+        """
+
+    @abstractmethod
     def sample(self, max_time: float, tau: float = inf) -> Trajectory:
         """
             Generates a trajectory

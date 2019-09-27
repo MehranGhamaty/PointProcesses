@@ -24,7 +24,7 @@ class Hawkes(PointProcess):
        Assumes labels are from the space [0, nlabels)
     """
     def __init__(self, nlabels: int, betas: List[int]):
-        self.__nlabels: int = nlabels
+        super(Hawkes, self).__init__(nlabels)
         self.__nkernels: int = len(betas)
 
         self.__betas = tf.reshape(tf.Variable(
@@ -53,7 +53,6 @@ class Hawkes(PointProcess):
     def __repr__(self):
         return "{}\n{}\n".format(self.__weights, self.__mus)
 
-
     def __call__(self, time_slice: TimeSlice) -> tf.Tensor:
         """
             Output is going to be the intensities
@@ -75,7 +74,7 @@ class Hawkes(PointProcess):
         """
             Returns a tensor that represents the new state
         """
-        states = tf.multiply(states, tf.exp(-time_slice.deltat * self.betas))
+        states = tf.multiply(states, tf.exp(-time_slice.deltat * self.__betas))
         states = tf.cond(time_slice.label != -1,
                          lambda: self.__states + self.__weights[time_slice.label],
                          lambda: self.__states)
@@ -90,8 +89,6 @@ class Hawkes(PointProcess):
         return tf.reduce_sum(self.__mus) + \
                tf.reduce_sum(self.__states) + \
                tf.reduce_sum(self.__weights)
-        # I'm not a 100% on that
-
 
     def resetstate(self):
         """ sets the state to 0 """
@@ -122,37 +119,15 @@ class Hawkes(PointProcess):
         """ applies updates with a step size """
         tf.compat.v1.assign_sub(self.__weights, eta * weightgrad)
         tf.compat.v1.assign_sub(self.__mus, eta * mugrad)
-
         tf.compat.v1.assign(self.__weights, tf.nn.relu(self.__weights))
         tf.compat.v1.assign(self.__mus, tf.nn.relu(self.__mus))
-
-    def calcsegnegllh(self, intensities, time_slice: TimeSlice) -> tf.Variable:
-        """
-            This isn't using self, and is sepecific to sum of
-            exponentials. The intensities would have to match
-            the kernel.
-
-            :param intensities: the current state of intensities
-                (make sure base rates are included)
-            :param traj: The trajectory to calculate the log likelihood of
-            :return: The log likelihood.
-        """
-        volume = tf.multiply(time_slice.deltat, intensities)
-        segscore = tf.cond(time_slice.label != -1,
-                           lambda: volume - tf.math.log(intensities),
-                           lambda: volume)
-        return tf.reduce_sum(segscore)
 
     def calcllh(self, traj: Trajectory) -> tf.Variable:
         """
             Calculates the log likelihood over entire trajectory
-            Note: this handles resetting the state
         """
-        llh = 0
         self.resetstate()
-        for time_slice in traj:
-            ints = self(time_slice)
-            llh -= self.calcsegnegllh(ints, time_slice)
+        llh = super(Hawkes, self).calcllh(traj)
         self.resetstate()
         return llh
 
@@ -226,16 +201,7 @@ class Hawkes(PointProcess):
             Generates a trajectory of from time 0 to max_time
             Stateless function
         """
-        traj = Trajectory({"times" : Field(values=[], continuous=True, space=(0, max_time)),
-                           "labels" : Field(values=[], continuous=False,
-                                            space=tf.convert_to_tensor(
-                                                [i for i in range(self.__nlabels)]))},
-                          tau=tau)
         self.resetstate()
-        for time_slice in self.sample_next_event():
-            if time_slice.time > max_time:
-                break
-            traj.add_time_slice(time_slice)
+        traj = super(Hawkes, self).sample(max_time, tau)
         self.resetstate()
-
         return traj

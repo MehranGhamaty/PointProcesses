@@ -7,37 +7,94 @@ from abc import ABCMeta, abstractmethod
 import tensorflow as tf
 from numpy import inf
 
-from DataStores.Trajectory import Trajectory, TimeSlice
+from DataStores.Trajectory import Trajectory, TimeSlice, Field
 
 class PointProcess(metaclass=ABCMeta):
     """
         This is a little tricky, because some point processes
         can be estimated efficiently without using GD.
 
+        Since the purpose is online learning, as this is going to be
+        a continuous time variant of ARIMA models the only paramter
+        at the moment is going to be the max window of the history.
+
+        It assumes there are nlabels
+
+        Keeps track of the total time and number of events per label
     """
 
-    def init(self, *args, **kwargs):
+    def __init__(self, nlabels: int, max_memory=inf):
         """
             Initializes the process
         """
+        self.__max_memory = max_memory
+        self.__nlabels = nlabels
+        self.__queue = []
+        self.__total_time = 0
+        self.__num_events = {i: 0 for i in range(self.__nlabels)}
+
+    def _add_to_queue(self, time_slice: TimeSlice):
+        """
+            Adds to a queue and removes items that are stale
+        """
+        self.__queue.append(time_slice)
+
+        while self.__queue[0].time < self.__queue[-1].time - self.__max_memory:
+            self.__total_time -= self.__queue[0].time
+            self.__num_events[time_slice.label] -= 1
+            del self.__queue[0]
+
+        if time_slice.label != -1:
+            self.__num_events[time_slice.label] += 1
+
+    def calcsegnegllh(self, intensities, time_slice: TimeSlice) -> tf.Variable:
+        """
+            Calculates the segments negative log likelihood
+
+
+            :param intensities: the current state of intensities
+            :param traj: The trajectory to calculate the log likelihood of
+            :return: The log likelihood.
+        """
+        volume = tf.multiply(time_slice, intensities)
+        segscore = tf.cond(time_slice.label != -1,
+                           lambda: volume - tf.math.log(intensities),
+                           lambda: volume)
+        return tf.reduce_sum(segscore)
+
+    def calcllh(self, traj: Trajectory) -> tf.Variable:
+        """
+            Calculates the log likelihood over a trajectory
+        """
+        llh = 0
+        for time_slice in traj:
+            ints = self(time_slice)
+            llh -= self.calcsegnegllh(ints, time_slice)
+        return llh
+
+    def sample(self, max_time: float, tau: float = inf) -> Trajectory:
+        """
+            This method is so similar to Hawkes process... I can probably
+            boiler plate a lot of this code...
+        """
+        traj = Trajectory({"times" : Field(values=[], continuous=True, space=(0, max_time)),
+                           "labels" : Field(values=[], continuous=False,
+                                            space=tf.convert_to_tensor(
+                                                [i for i in range(self.__nlabels)]))},
+                          tau=tau)
+        for time_slice in self.sample_next_event():
+            if time_slice.time > max_time:
+                break
+            traj.add_time_slice(time_slice)
+        return traj
 
     @abstractmethod
     def __call__(self, time_slice: TimeSlice) -> tf.Tensor:
         """
             This function returns the current intensities
             and updates the internal state of the model
-        """
 
-    @abstractmethod
-    def resetstate(self):
-        """
-            resets internal state
-        """
-
-    @abstractmethod
-    def calcllh(self, traj: Trajectory) -> tf.Variable:
-        """
-            Calculates the log likelihood of a trajectory
+            The return value is the new intensity per label as a tensor
         """
 
     @abstractmethod
@@ -46,8 +103,6 @@ class PointProcess(metaclass=ABCMeta):
             Generates a new event
         """
 
-    @abstractmethod
-    def sample(self, max_time: float, tau: float = inf) -> Trajectory:
-        """
-            Generates a trajectory
-        """
+    @property
+    def nlabels(self):
+        return self.__nlabels

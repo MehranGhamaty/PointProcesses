@@ -12,6 +12,12 @@
     A Trajectory manages a set of Fields.
 
     An Episodes object manages a set of Trajectories.
+
+    I want to extend the trajectory to hold arbitary information, is that possible?
+    What do I do with the label then?
+
+
+    On the side lets do the lat long representation as well,
 """
 import functools
 from dataclasses import dataclass, field
@@ -29,7 +35,7 @@ class TimeSlice:
     time: tf.constant  # the end time of the slice
     deltat: tf.constant  # the duration of the slice
     label: tf.constant  # if -1 no event occured
-
+    mark: Optional[Tuple[tf.constant, tf.constant]] = None
 
 @dataclass
 class Field:
@@ -79,25 +85,31 @@ class Trajectory:
                                        space=val.space)
 
         currtime = self.__fields["times"].space[0]
-        for time, label in zip(fields["times"].values,
-                               fields["labels"].values):
+        for ind, time in enumerate(fields["times"].values):
+
             timeuntilnextevent = time - currtime
             while timeuntilnextevent > tau:
                 timeuntilnextevent -= tau
                 self._addevent((tau, -1))
 
+            label = fields["label"].values[ind]
             if label not in self.numevents:
                 self.numevents[label] = 0
             self.numevents[label] += 1
 
-            self._addevent((timeuntilnextevent.numpy(), label.numpy()))
+            # for each other field I need to add its info to addevent
+            aux = {}
+            for key in fields.keys():
+                if key != "times" or key != "labels":
+                    aux[key] = fields[key].values[ind]
+            self._addevent((timeuntilnextevent.numpy(), label.numpy()), aux)
 
-        self.__fields["times"].values = tf.convert_to_tensor(
-            self.__fields["times"].values,
-            dtype=tf.float32)
-        self.__fields["labels"].values = tf.convert_to_tensor(
-            self.__fields["labels"].values,
-            dtype=tf.int32)
+        # Convert everything to tensors
+        for key in fields.keys():
+            self.__fields[key].values = tf.convert_to_tensor(
+                self.__fields[key].vaues, dtype=tf.float32 if self.__fields[key].continuous else tf.int32)
+
+        # Used for streaming
         self._totaltime = 0
         self._i = 0
 
@@ -116,13 +128,16 @@ class Trajectory:
         tf.stack([self.__fields["times"].values.numpy(), [time_slice.deltat.numpy()]])
         tf.stack([self.__fields["labels"].values.numpy(), [time_slice.label.numpy()]])
 
-    def _addevent(self, event: Tuple[float, int]):
+    def _addevent(self, event: Tuple[float, int], **kwargs):
         """
             Adds an event to the trajectory
             For use during init
         """
         self.__fields["times"].values.append(event[0])
         self.__fields["labels"].values.append(event[1])
+
+        for key, arg in kwargs.items():
+            self.__fields[key].values.append(arg)
 
     @property
     def field(self) -> Dict[str, Field]:

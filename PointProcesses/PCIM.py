@@ -9,11 +9,12 @@
     Other implementations have access to the entire trajectory which allows
     for picking the counts all the time
 
+    Giving up on this for a little while, I think Hawkes process might be a bit
+    better
 
 """
 from abc import ABCMeta, abstractmethod
-from typing import Optional, List, Tuple
-from dataclasses import dataclass, field
+from typing import Optional, List, Tuple, Dict
 
 import tensorflow as tf
 import numpy as np
@@ -108,10 +109,10 @@ class BasisFunctionBank:
         and the scores associated with
         each basis function so far.
 
+
+
         Takes a variable and counts
 
-        There is a problem with this....
-        I can have default sizes.....
     """
     def __init__(self, variables_and_counts: Dict[int, List[int]],
                  time_windows: List[Tuple[float, float]]):
@@ -130,7 +131,10 @@ class BasisFunctionBank:
 
     def _generate_basis_function(self, variables_and_counts: Dict[int, List[int]],
                                  time_windows: List[Tuple[float, float]]) -> List[BasisFunction]:
-        """ Generates basis functions """
+        """
+            Generates basis functions
+            This entire design is wrong.
+        """
         return []
 
     @property
@@ -178,6 +182,25 @@ class BasisFunctionBank:
              (this is for just llh....)
 
              for each side
+
+             So for the basis functions I can't be using a static list....
+
+             Maybe something else.....
+
+             I could try to just keep the sufficient statistics about the processes.
+
+             What would the goal then be?
+
+             so everytime I add an event what exactly do I do?
+
+             I need to have a queue per time window.
+             Is there any way to
+
+             What have I done since monday (not including all the stuff on the desktop)
+             I have fixed the hawkes process stuff, I ran the non-conjoint tests.
+
+             I also don't have any of the Bayes stuff, which seemed to not make a real difference
+             other than the selection of kappa or whatever.
             """
             n = self.__counts[i][evaluation]
             t = self.__timeamounts[i][evaluation]
@@ -212,14 +235,15 @@ class BasisFunctionBank:
         self.__i += 1
         return self.__basis_functions[self.__i]
 
+
 class DTNode:
     """
         This is the DT Node which contains some PointProcess at its leaves.
 
     """
     def __init__(self, variables_and_counts: Dict[int, List[int]],
-                time_windows: List[Tuple[float, float]],
-                delta: float = 10.):
+                 time_windows: List[Tuple[float, float]],
+                 delta: float = 10.):
         self.__variables_and_counts = variables_and_counts
         self.__time_windows = time_windows
         self.__delta = delta
@@ -269,7 +293,7 @@ class DTNode:
 
     def freeze(self):
         """
-            sets done to true
+            sets done to true so that the parameters aren't updated continuously
         """
         self.__done = True
 
@@ -280,21 +304,21 @@ class DT(PointProcess):
         It keeps track of the root node, the total times,
         along with all the leaves.
     """
-    def __init__(self, nlabels: List[int], testbank: BasisFunctionBank):
+    def __init__(self, nlabels: List[int], test_bank: BasisFunctionBank):
         super(DT, self).__init__()
-        self.resetstate()
-
-    def resetstate(self):
-        """
-            Resets internal state of self and all the leaf nodes
-        """
-        #for leaf in self.__leaves:
-        #   leaf.resetstate()
         self.__testbank = testbank
         self.__nlabels = nlabels
         self.__root: PCIMNode = PCIMNode()
         self.__total_time = 0
         self.__leaves: [self.__root]
+
+    def resetstate(self):
+        """
+            Resets internal state of self and all the leaf nodes
+        """
+        for leaf in self.__leaves:
+           leaf.resetstate()
+        self.__total_time = 0
 
     def calcllh(self, traj: Trajectory) -> tf.Variable:
         """
@@ -302,7 +326,15 @@ class DT(PointProcess):
             trajectory.
         """
 
+    def _get_rate(self, variable) -> float:
+        """
+            gets the rate for a variable.
+        """
+        return self.__root.get_rate()
+
     def __call__(self, time_slice: TimeSlice) -> tf.Variable:
         """
-            Calls to add a time_slice to the state
+            Calls to add a time_slice to the state and returns the intensity per
+            variable.
         """
+        return tf.convert_to_tensor([self._get_rate(v) for v in range(self.__nlabels)], dtype=tf.dtype.float32)

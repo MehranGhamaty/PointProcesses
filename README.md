@@ -3,27 +3,13 @@
 This is a python package to explore point processes, specifically online learning
 of temporal point process.
 This is built using TensorFlow for its automatic differentiation, along with
-typing to catch bugs.
+static typing to catch bugs.
 
-Scipy is used to fit distributions at the leaves of the PCIM (how exactly do I do this...).
-
-So far only a multivariate Hawkes process with static base rate and a sum of
-exponential triggering kernels is the only model. It has gradient ascent along
-with sampling implemented.
+A multivariate Hawkes process with static base rate and a sum of
+exponential triggering kernels is the only model currently implemented. 
 
 This work is the composition of a few papers along with previous implementations
 of Hawkes process, bayesian networks, and PCIMs.
-
-# Tasks
-
-I want to use these models for NLP. What tasks are associated with that?
-What can I be using to compare? How do I set up a data pipeline for it?
-What is my purpose?
-
-I need to get my computer in here along with a desk. Whats the purpose of anything?
-
-Most people can't be in relationships with younger people because they look too old.
-If I have enough money I can solve that issue.
 
 # Install
 

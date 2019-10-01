@@ -22,7 +22,7 @@
 import functools
 from dataclasses import dataclass, field
 
-from typing import Dict, List, Tuple, Union, Set
+from typing import Dict, List, Tuple, Union, Set, Optional
 from numpy import inf
 
 import tensorflow as tf
@@ -76,15 +76,15 @@ class Trajectory:
         # tau = tf.convert_to_tensor(tau, dtype=tf.float32)
         # neglab = tf.convert_to_tensor(-1, dtype=tf.int32)
 
-        self.__numevents = dict()
-        self.__totaltime = fields["times"].space[1] - fields["times"].space[0]
+        self._numevents = dict()
+        self._totaltime = fields["times"].space[1] - fields["times"].space[0]
 
-        self.__fields = dict()
+        self._fields = dict()
         for key, val in fields.items():
-            self.__fields[key] = Field(continuous=val.continuous,
-                                       space=val.space)
+            self._fields[key] = Field(continuous=val.continuous,
+                                      space=val.space)
 
-        currtime = self.__fields["times"].space[0]
+        currtime = self._fields["times"].space[0]
         for ind, time in enumerate(fields["times"].values):
 
             timeuntilnextevent = time - currtime
@@ -102,86 +102,95 @@ class Trajectory:
             for key in fields.keys():
                 if key != "times" or key != "labels":
                     aux[key] = fields[key].values[ind]
-            self._addevent((timeuntilnextevent.numpy(), label.numpy()), aux)
+
+            if timeuntilnextevent is tf.Tensor:
+                self._addevent((timeuntilnextevent.numpy(), label.numpy()), **aux)
+            else:
+                self._addevent((timeuntilnextevent, label), **aux)
 
         # Convert everything to tensors
         for key in fields.keys():
-            self.__fields[key].values = tf.convert_to_tensor(
-                self.__fields[key].vaues, dtype=tf.float32 if self.__fields[key].continuous else tf.int32)
+            self._fields[key].values = tf.convert_to_tensor(
+                self._fields[key].vaues,
+                dtype=tf.float32 if self._fields[key].continuous else tf.int32)
 
         # Used for streaming
+        self._totaltime = 0
+        self._i = 0
+
+    def resetstate(self):
         self._totaltime = 0
         self._i = 0
 
     @property
     def totaltime(self):
         """ returns the total amount of time in the traj """
-        return self.__totaltime
+        return self._totaltime
 
     @property
     def numevents(self):
         """ returns a dictionary that maps the labs to number of events """
-        return self.__numevents
+        return self._numevents
 
     def add_time_slice(self, time_slice: TimeSlice):
         """ No validation checks """
-        tf.stack([self.__fields["times"].values.numpy(), [time_slice.deltat.numpy()]])
-        tf.stack([self.__fields["labels"].values.numpy(), [time_slice.label.numpy()]])
+        tf.stack([self._fields["times"].values.numpy(), [time_slice.deltat.numpy()]])
+        tf.stack([self._fields["labels"].values.numpy(), [time_slice.label.numpy()]])
 
     def _addevent(self, event: Tuple[float, int], **kwargs):
         """
             Adds an event to the trajectory
             For use during init
         """
-        self.__fields["times"].values.append(event[0])
-        self.__fields["labels"].values.append(event[1])
+        self._fields["times"].values.append(event[0])
+        self._fields["labels"].values.append(event[1])
 
         for key, arg in kwargs.items():
-            self.__fields[key].values.append(arg)
+            self._fields[key].values.append(arg)
 
     @property
     def field(self) -> Dict[str, Field]:
         """ Returns the fields """
-        return self.__fields
+        return self._fields
 
     def __len__(self) -> int:
-        return len(self.__fields["times"])
+        return len(self._fields["times"])
 
     def __iter__(self):
         return self
 
     def __next__(self) -> TimeSlice:
-        if self._i >= len(self.__fields["times"]):
+        if self._i >= len(self._fields["times"]):
             self._i = 0
             self._totaltime = 0
             raise StopIteration
 
-        time = self.__fields["times"].values[self._i]
-        label = self.__fields["labels"].values[self._i]
+        time = self._fields["times"].values[self._i]
+        label = self._fields["labels"].values[self._i]
         self._totaltime += time  # this isn't a tf object
         self._i += 1
         return TimeSlice(time=self._totaltime, deltat=time, label=label)
 
     def __repr__(self):
-        return self.__fields.__repr__()
+        return self._fields.__repr__()
 
 
 class Episodes:
     """ Contains a list of trajectories """
 
     def __init__(self, trajs: List[Trajectory]):
-        self.__trajs = trajs
-        self.__i = 0
-        self.__totaltime = functools.reduce(lambda tot, t: tot + t.totaltime, trajs, 0)
-        self.__nevents = dict()
-        self.__totalnevents = 0
+        self._trajs = trajs
+        self._i = 0
+        self._totaltime = functools.reduce(lambda tot, t: tot + t.totaltime, trajs, 0)
+        self._nevents = dict()
+        self._totalnevents = 0
 
         for traj in trajs:
             for label, count in traj.numevents.items():
-                if label not in self.__nevents:
-                    self.__nevents[label] = 0
-                self.__nevents[label] += count
-                self.__totalnevents += count
+                if label not in self._nevents:
+                    self._nevents[label] = 0
+                self._nevents[label] += count
+                self._totalnevents += count
 
     @property
     def totaln(self):
@@ -202,8 +211,8 @@ class Episodes:
         return self
 
     def __next__(self) -> Trajectory:
-        if self.__i >= len(self.__trajs):
-            self.__i = 0
+        if self._i >= len(self._trajs):
+            self._i = 0
             raise StopIteration
-        self.__i += 1
-        return self._trajs[self.__i]
+        self._i += 1
+        return self._trajs[self._i]

@@ -122,12 +122,31 @@ class Hawkes(PointProcess):
         tf.compat.v1.assign(self.__weights, tf.nn.relu(self.__weights))
         tf.compat.v1.assign(self.__mus, tf.nn.relu(self.__mus))
 
+    @staticmethod
+    def calcsegnegllh(intensities, time_slice: TimeSlice) -> tf.Variable:
+        """
+            Calculates the segments negative log likelihood
+            Since its the sum of exponentials I can do this exactly....
+            Just sume the integrals
+
+            :param intensities: the current state of intensities
+            :param traj: The trajectory to calculate the log likelihood of
+            :return: The log likelihood.
+        """
+        #this is actually a pretty terrible approximation
+        # volume = tf.multiply(time_slice, intensities)
+        volume = 1 - tf.math.exp(-intensities * time_slice.deltat)
+        segscore = tf.cond(time_slice.label != -1,
+                           lambda: volume - tf.math.log(intensities),
+                           lambda: volume)
+        return tf.reduce_sum(segscore)
+
     def calcllh(self, traj: Trajectory) -> tf.Variable:
         """
             Calculates the log likelihood over entire trajectory
         """
         self.resetstate()
-        llh = super(Hawkes, self).calcllh(traj)
+        llh = self.calcllh(traj)
         self.resetstate()
         return llh
 

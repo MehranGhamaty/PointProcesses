@@ -47,15 +47,16 @@ class PointProcess(metaclass=ABCMeta):
         if time_slice.label != -1:
             self.__num_events[time_slice.label] += 1
 
-    def calcsegnegllh(self, intensities, time_slice: TimeSlice) -> tf.Variable:
+    @staticmethod
+    def calcsegnegllh(intensities, time_slice: TimeSlice) -> tf.Variable:
         """
             Calculates the segments negative log likelihood
-
 
             :param intensities: the current state of intensities
             :param traj: The trajectory to calculate the log likelihood of
             :return: The log likelihood.
         """
+        #this is actually a pretty terrible approximation
         volume = tf.multiply(time_slice, intensities)
         segscore = tf.cond(time_slice.label != -1,
                            lambda: volume - tf.math.log(intensities),
@@ -105,4 +106,5 @@ class PointProcess(metaclass=ABCMeta):
 
     @property
     def nlabels(self):
+        """ Gets the number of labels """
         return self.__nlabels

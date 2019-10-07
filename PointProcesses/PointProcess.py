@@ -20,12 +20,16 @@ class PointProcess(metaclass=ABCMeta):
 
         It assumes there are nlabels
 
+        How do I get a mapping from this to a multiset of labels?
+        The Hawkes process isn't using this actually so I don't
+        have to worr about it.
+
         Keeps track of the total time and number of events per label
     """
 
     def __init__(self, nlabels: int, max_memory=inf):
         """
-            Initializes the process
+            Initializes the process.
         """
         self.__max_memory = max_memory
         self.__nlabels = nlabels
@@ -75,8 +79,9 @@ class PointProcess(metaclass=ABCMeta):
 
     def sample(self, max_time: float, tau: float = inf) -> Trajectory:
         """
-            This method is so similar to Hawkes process... I can probably
-            boiler plate a lot of this code...
+            Samples an entire trajectory.
+            Not sure how I am going to deal with this in the case
+            of a multiset. How do the labels look different?
         """
         traj = Trajectory({"times" : Field(values=[], continuous=True, space=(0, max_time)),
                            "labels" : Field(values=[], continuous=False,

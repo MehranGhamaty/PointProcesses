@@ -1,11 +1,10 @@
 """
     Author: Mehran Ghamaty
 
-    Class for a hawkre is process.
+    Class for a Hawkes process.
     Assumes that there is a tensorflow session executing eagerly.
 
-
-    Do not try to sample and perform gradient descent.
+    Do not try to sample and perform gradient descent at the same time.
 """
 from typing import List
 from numpy import inf
@@ -14,31 +13,47 @@ import tensorflow as tf
 
 from PointProcesses.PointProcess import PointProcess
 
-from DataStores.Trajectory import Trajectory, TimeSlice, Field
+from DataStores.Trajectory import Trajectory, TimeSlice
 
 class Hawkes(PointProcess):
     """
        A general multivariate Hawkes process that uses a sum of exponentials
        Non-modular kernel. Some methods manage state, be aware.
 
+       Works a lot better if mus and betas are approximately correct,
+       use the set params function to initialize them reasonably.
+
+       This can be done with the set params method, but I really
+       should write my own initialization method that takes a
+       sample trajectory.
+
+       Each set of nlabels gets its own matrix, this is a good way
+       of representing mutiple discrete attributes.
+
        Assumes labels are from the space [0, nlabels)
     """
-    def __init__(self, nlabels: int, betas: List[int]):
-        super(Hawkes, self).__init__(nlabels)
-        self.__nkernels: int = len(betas)
 
-        self.__betas = tf.reshape(tf.Variable(
-            initial_value=betas,
-            dtype=tf.float32, trainable=True), (1, self.__nkernels))
+    def __init__(self, nlabels: List[int]):
+        # super(Hawkes, self).__init__(nlabels)
+        self.__nkernels: int = len(nlabels)
+
+        # self.__betas = tf.reshape(tf.Variable(
+        #    initial_value=betas,
+        #    dtype=tf.float32, trainable=True), (1, self.__nkernels))
+
+        self.__betas: tf.Variable = tf.Variable(
+            initial_value=tf.random.uniform((1, self.__nkernels))
+        )
 
         # I need better ways of initializing these....
         # mu should make sure everthing is always positive....
-        # constraints..... I really feel like using the lagrangian would be better than other
-        # other methods I've seen.....
+        # constraints..... I really feel like using the lagrangian would be
+        # better than other other methods I've seen.....
 
         self.__weights: tf.Variable = tf.Variable(
-            initial_value=tf.random.uniform((self.__nlabels, self.__nlabels, self.__nkernels),
-                                            minval=0.001, maxval=1),
+            initial_value=tf.random.uniform((self.__nlabels,
+                                             self.__nlabels, self.__nkernels),
+                                             minval=0.001, maxval=1),
             dtype=tf.float32, trainable=True)
 
         self.__mus: tf.Variable = tf.Variable(

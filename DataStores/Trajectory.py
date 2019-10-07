@@ -13,19 +13,18 @@
 
     An Episodes object manages a set of Trajectories.
 
-    I want to extend the trajectory to hold arbitary information, is that possible?
-    What do I do with the label then?
-
+    The label should actually be an optional attribute,
 
     On the side lets do the lat long representation as well,
 """
 import functools
 from dataclasses import dataclass, field
 
-from typing import Dict, List, Tuple, Union, Set, Optional
+from typing import Dict, List, Tuple, Union, Set, Optional, String
 from numpy import inf
 
 import tensorflow as tf
+
 
 @dataclass
 class TimeSlice:
@@ -34,8 +33,8 @@ class TimeSlice:
     """
     time: tf.constant  # the end time of the slice
     deltat: tf.constant  # the duration of the slice
-    label: tf.constant  # if -1 no event occured
-    mark: Optional[Tuple[tf.constant, tf.constant]] = None
+    mark: Optional[Dict[String, tf.constant]] = None
+
 
 @dataclass
 class Field:
@@ -54,7 +53,7 @@ class Trajectory:
     """
         Holds information about the events such as the their label and time
         This is for online learning, so when iterating through there is a
-        delta such that
+        delta so it can be updated even when no events occur.
     """
 
     def __init__(self, fields: Dict[str, Field], tau: float = inf):
@@ -63,11 +62,14 @@ class Trajectory:
             such
             that t_0 = 0, and the following will be the next time or t_{k-1} +
             \tau,
-            which ever comes first. If t_{k-1} + \tau is first then the associated
-            label is -1.
+            which ever comes first. If t_{k-1} + \tau is
+            first then the associated label is None.
 
             The issue being when I'm going to calculate the sums
             I'm going to do a sum over the labels.
+
+            Assumes that there will be at most 3 fields; times, labels, and
+            It shouldn't matter what I call the fields except for time.
 
             :param fields: A dictionary containing the fields
             :param delta: the discretization period.
@@ -119,6 +121,7 @@ class Trajectory:
         self._i = 0
 
     def resetstate(self):
+        """ Resets the total time for iterating over """
         self._totaltime = 0
         self._i = 0
 
@@ -133,9 +136,14 @@ class Trajectory:
         return self._numevents
 
     def add_time_slice(self, time_slice: TimeSlice):
-        """ No validation checks """
-        tf.stack([self._fields["times"].values.numpy(), [time_slice.deltat.numpy()]])
-        tf.stack([self._fields["labels"].values.numpy(), [time_slice.label.numpy()]])
+        """
+            No validation checks pretty sure this is not going
+            to work if I have none types.
+        """
+        tf.stack([self._fields["times"].values.numpy(),
+                  [time_slice.deltat.numpy()]])
+        tf.stack([self._fields["labels"].values.numpy(),
+                  [time_slice.label.numpy()]])
 
     def _addevent(self, event: Tuple[float, int], **kwargs):
         """

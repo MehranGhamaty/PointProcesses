@@ -1,8 +1,8 @@
 # About
 
-This is a python package to explore point processes, specifically online learning
+The python package is written to explore point processes, specifically online learning
 of temporal point process.
-This is built using TensorFlow for its automatic differentiation, along with
+The tool is constructed using TensorFlow, using automatic differentiation, along with
 static typing to catch bugs.
 
 A multivariate Hawkes process with static base rate and a sum of

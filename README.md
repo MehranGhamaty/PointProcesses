@@ -58,3 +58,16 @@ sampled_trajectory = hp.sample(max_time=10.)
 For a more complete view along with experiments using more composable functions
 please see the notebooks. Keep in mind that most of this code base is fairly useless,
 it was an attempt at writing a generalized toolkit for temporal point processes.
+
+I chose to use GD for online learning because it is the most efficient when the dataset
+size reaches infinity (I should find the citation for that).
+
+The problem is that shown in one of the notebooks, a Hawkes process with a single 
+exponential kernel should have a loss function with a global minimum. This means
+when sampling from the model and relearning a new model from the sampled model 
+the parameters should converge. That wasn't happening, I know the code is working
+because I verified all the parts. This means there is probably something wrong with my 
+mathematical assumptions and I want to rewrite the code using EM to verify above statement.
+
+Yes research is hard and annoying and this is why graduate students not working with existing toolkits 
+take longer to produce research.

@@ -59,20 +59,4 @@ For a more complete view along with experiments using more composable functions
 please see the notebooks. Keep in mind that most of this code base is fairly useless,
 it was an attempt at writing a generalized toolkit for temporal point processes.
 
-I chose to use GD for online learning because it is the most efficient when the dataset
-size reaches infinity (I should find the citation for that).
 
-The problem is shown in one of the notebooks, a Hawkes process with a single 
-exponential kernel should have a loss function with a global minimum. This means
-when sampling from the model and relearning a new model from the sampled model 
-the parameters should converge. That wasn't happening, I know the code is working
-because I verified all the parts, maybe I wasn't producing enough samples. 
-The problem was the learner was starting to have a higher likilhood than the model
-being sampled from.
-This means there is probably something wrong with my assumptions and 
-I want to rewrite the code using EM to verify above statement 
-(because I know that should work from previous implementations and I think tensorflow has support for it now).
-
-Research is hard and annoying and this is why graduate students not working with existing toolkits 
-take longer to produce research. I also was going to try to get more than a few papers off of this 
-toolkit so it would have been worth the development time.

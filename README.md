@@ -1,4 +1,4 @@
-# About
+# Description
 
 The python package is written to explore point processes, specifically online learning
 of temporal point process.
@@ -20,7 +20,8 @@ python setup.py install
 ```
 
 An example for creating a Trajectory with 0.1 units as the discretization amount
-are:
+are (If you want continuous set it to np.inf, it will be much faster to run and 
+the estimated parameters will have a higher likelihood):
 
 ```python
 

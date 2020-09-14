@@ -69,7 +69,7 @@ the parameters should converge. That wasn't happening, I know the code is workin
 because I verified all the parts, maybe I wasn't producing enough samples. 
 The problem was the learner was starting to have a higher likilhood than the model
 being sampled from.
-This means there is probably something wrong with my mathematical assumptions and 
+This means there is probably something wrong with my assumptions and 
 I want to rewrite the code using EM to verify above statement 
 (because I know that should work from previous implementations and I think tensorflow has support for it now).
 

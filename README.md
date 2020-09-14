@@ -41,7 +41,6 @@ fields = {
 trajectory = Trajectory(fields, tau=0.1)
 ```
 
-
 An example for creating a Hawkes process, estimating parameters, and sampling
 can be seen below.
 
@@ -57,4 +56,5 @@ sampled_trajectory = hp.sample(max_time=10.)
 ```
 
 For a more complete view along with experiments using more composable functions
-please see the notebooks.
+please see the notebooks. Keep in mind that most of this code base is fairly useless,
+it was an attempt at writing a generalized toolkit for temporal point processes.

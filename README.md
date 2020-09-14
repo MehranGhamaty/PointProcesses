@@ -70,7 +70,8 @@ because I verified all the parts, maybe I wasn't producing enough samples.
 The problem was the learner was starting to have a higher likilhood than the model
 being sampled from.
 This means there is probably something wrong with my mathematical assumptions and 
-I want to rewrite the code using EM to verify above statement (because I know that should work from previous implementations).
+I want to rewrite the code using EM to verify above statement 
+(because I know that should work from previous implementations and I think tensorflow has support for it now).
 
 Research is hard and annoying and this is why graduate students not working with existing toolkits 
 take longer to produce research. I also was going to try to get more than a few papers off of this 

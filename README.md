@@ -70,4 +70,5 @@ because I verified all the parts. This means there is probably something wrong w
 mathematical assumptions and I want to rewrite the code using EM to verify above statement.
 
 Yes research is hard and annoying and this is why graduate students not working with existing toolkits 
-take longer to produce research.
+take longer to produce research. I also was going to try to get more than a few papers off of this 
+toolkit so it would have been worth the development time.

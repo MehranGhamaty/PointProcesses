@@ -59,4 +59,4 @@ For a more complete view along with experiments using more composable functions
 please see the notebooks. Keep in mind that most of this code base is fairly useless,
 it was an attempt at writing a generalized toolkit for temporal point processes.
 
-This toolkit should probably be rerweitten. 
+This toolkit should probably be rewritten. 

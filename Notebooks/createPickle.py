@@ -59,4 +59,4 @@ with open(outputtimes, 'wb') as f:
 with open(outputlabels, 'wb') as f:
     pickle.dump(labels, f)
 with open(outputlabelmap, 'wb') as f:
-    pickle.dump(labelmap, f)
+    pickle.dump(labelmap, f) 

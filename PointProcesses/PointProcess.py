@@ -22,7 +22,7 @@ class PointProcess(metaclass=ABCMeta):
 
         How do I get a mapping from this to a multiset of labels?
         The Hawkes process isn't using this actually so I don't
-        have to worr about it.
+        have to worry about it.
 
         Keeps track of the total time and number of events per label
     """

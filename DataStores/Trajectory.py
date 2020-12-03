@@ -8,7 +8,7 @@
     a label and a mark.
 
     A Field is one of the members in a Trajectory.
-
+ 
     A Trajectory manages a set of Fields.
 
     An Episodes object manages a set of Trajectories.

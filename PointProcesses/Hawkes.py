@@ -4,7 +4,7 @@
     Class for a Hawkes process.
     Assumes that there is a tensorflow session executing eagerly.
 
-    Do not try to sample and perform gradient descent at the same time.
+    Do not try to sample and perform gradient descent at the same time. 
 """
 from typing import List
 from numpy import inf

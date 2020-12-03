@@ -27,3 +27,4 @@ traj = Trajectory(
         "times" : Field(values=times, continuous=True, space=(start, end)),
         "labels" : Field(values=labels, continuous=False, space=labelset)
     })
+ 

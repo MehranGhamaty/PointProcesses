@@ -12,4 +12,5 @@ def transform_to_uniform(traj: Trajectory, pointprocess: PointProcess):
     
         That is I need to be able to integrate the intensity over specific portions of time....
 
+        This makes several other analysis tools easier... I wish I included the papers for this.
     """

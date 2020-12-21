@@ -60,4 +60,5 @@ please see the notebooks. Keep in mind that most of this code base is fairly use
 it was an attempt at writing a generalized toolkit for temporal point processes.
 
 The toolkit is probably incomplete, the data representation needs to be changed 
-before continuing the development.
+before continuing the development. It does serve as a pretty good learning tool
+if you want to take a look.

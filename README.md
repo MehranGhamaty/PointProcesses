@@ -8,8 +8,6 @@ exponential triggering kernels is the only model currently implemented.
 This work is the composition of a few papers along with previous implementations
 of graphical models.
 
-Feel free to use it if you want.
-
 # Install
 
 To install run

@@ -39,8 +39,6 @@ fields = {
 }
 trajectory = Trajectory(fields, tau=0.1)
 ```
-If you want continuous set it to np.inf, it will be less computationally intensive
-and the estimated parameters will have a higher likelihood. 
 
 An example for creating a Hawkes process, estimating parameters, and sampling
 can be seen below.
@@ -55,6 +53,3 @@ hp.gradient_descent_full(trajectory, eta=0.1)
 
 sampled_trajectory = hp.sample(max_time=10.)
 ```
-
-For a more complete view along with experiments using more composable functions
-please see the notebooks. 

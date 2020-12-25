@@ -20,8 +20,7 @@ python setup.py install
 ```
 
 An example for creating a Trajectory with 0.1 units as the discretization amount
-are (If you want continuous set it to np.inf, it will be much faster to run and 
-the estimated parameters will have a higher likelihood):
+is given below: 
 
 ```python
 
@@ -40,6 +39,9 @@ fields = {
 }
 trajectory = Trajectory(fields, tau=0.1)
 ```
+If you want continuous set it to np.inf, it will be less computationally intensive
+and the estimated parameters will have a higher likelihood. 
+Given some assumptions that may not hold in real data.
 
 An example for creating a Hawkes process, estimating parameters, and sampling
 can be seen below.
@@ -56,8 +58,11 @@ sampled_trajectory = hp.sample(max_time=10.)
 ```
 
 For a more complete view along with experiments using more composable functions
-please see the notebooks. Keep in mind that most of this code base is fairly useless,
+please see the notebooks. Keep in mind that most of this code base is pretty rudimentary,
 it was an attempt at writing a generalized toolkit for temporal point processes.
+Adding to it should be relatively easy, but I'm not satisfied with the data representation.
+I do not have enough experience working with extremely large datasets with varying labels and annotations
+to know exactly what would work best. I have a few ideas on what to change.
 
 The toolkit is incomplete, the data representation needs to be changed 
 before continuing the development (Its okay for just research). It does serve as a learning tool

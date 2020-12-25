@@ -41,7 +41,6 @@ trajectory = Trajectory(fields, tau=0.1)
 ```
 If you want continuous set it to np.inf, it will be less computationally intensive
 and the estimated parameters will have a higher likelihood. 
-Given some assumptions that may not hold in real data.
 
 An example for creating a Hawkes process, estimating parameters, and sampling
 can be seen below.

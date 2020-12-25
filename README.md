@@ -9,7 +9,7 @@ A multivariate Hawkes process with static base rate and a sum of
 exponential triggering kernels is the only model currently implemented. 
 
 This work is the composition of a few papers along with previous implementations
-of Hawkes process, bayesian networks, and PCIMs.
+of graphical models.
 
 # Install
 

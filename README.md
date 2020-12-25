@@ -58,5 +58,4 @@ sampled_trajectory = hp.sample(max_time=10.)
 ```
 
 For a more complete view along with experiments using more composable functions
-please see the notebooks. Keep in mind that most of this code base is pretty rudimentary,
-it was an attempt at writing a generalized toolkit for temporal point processes.
+please see the notebooks. 

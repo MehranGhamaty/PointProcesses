@@ -1,6 +1,6 @@
 # Description
 
-The python package is written to explore point processes, specifically online learning
+The python package is written to explore point processes, specifically anytime versions
 of temporal point process.
 The tool is constructed using TensorFlow, using automatic differentiation, along with
 static typing to catch bugs.

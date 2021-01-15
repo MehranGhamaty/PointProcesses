@@ -1,5 +1,6 @@
 """
-    This is a class for superposition of homogeneous Poisson Process
+    This is a class for superposition of homogeneous Poisson Process.
+    
 """
 
 import numpy as np
@@ -14,7 +15,8 @@ class HomogeneousPoissonProcess(PointProcess):
         written for online learning.
 
         No prior (the advantage of online learning comes from large datasets
-        where the prior won't really help at all anyway)
+        where the prior won't really help at all anyway). Actually it depends on where 
+        your definition of prior comes from.
     """
 
     def __init__(self, nlabels: int, max_memory: float = np.inf):
@@ -31,7 +33,7 @@ class HomogeneousPoissonProcess(PointProcess):
     def sample_next_event(self) -> TimeSlice:
         """
             samples an event from the process using superposition.
-            parameters are not re-estimated while sampling
+            parameters are not re-estimated while sampling. 
         """
         lambdabar = np.sum(self.__intensities)
         while True:
@@ -74,7 +76,7 @@ class HomogeneousPoissonProcess(PointProcess):
 
     def add_time_slice(self, time_slice: TimeSlice):
         """
-            Adds the time slice to the queue and restimates parameters
+            Adds the time slice to the queue and re-estimates parameters
         """
         super(HomogeneousPoissonProcess, self)._add_to_queue(time_slice)
 

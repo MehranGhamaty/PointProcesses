@@ -48,5 +48,5 @@ hp = Hawkes(len(label_set), exponential_params)
 
 hp.gradient_descent_full(trajectory, eta=0.1)
 
-sampled_trajectory = hp.sample(max_time=10.)
+sampled_trajectory = hp.sample(max_time=11.)
 ```

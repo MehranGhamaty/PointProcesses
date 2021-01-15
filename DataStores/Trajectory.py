@@ -52,9 +52,9 @@ class Field:
 class Trajectory:
     """
         Holds information about the events such as the their label and time
-        This is for online learning, so when iterating through there is a
-        delta so it can be updated even when no events occur.
-    """
+        This is for online learning, meaning that the delta is the minimum
+        amount of time where no events occur before an update takes place.
+   """
 
     def __init__(self, fields: Dict[str, Field], tau: float = inf):
         """

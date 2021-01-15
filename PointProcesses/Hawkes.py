@@ -7,7 +7,7 @@
     Do not try to sample and perform gradient descent at the same time. 
     
     A sub-class of Heterogenious Poisson Process (there are more names for this type of process). 
-    A more flexible version of a Homogenous Poisson Process, for everybody whos confused.
+    A more flexible version of a Homogenous Poisson Process, for everybody who is confused.
     It wasn't labeled.
 """
 from typing import List

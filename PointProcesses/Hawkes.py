@@ -6,7 +6,7 @@
 
     Do not try to sample and perform gradient descent at the same time. 
     
-    A sub-class of Heterogenious Poisson Process (there are more labels for this type of process). 
+    A sub-class of Heterogenious Poisson Process (there are more names for this type of process). 
     It wasn't labeled.
 """
 from typing import List

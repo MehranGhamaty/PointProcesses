@@ -50,5 +50,4 @@ hp.gradient_descent_full(trajectory, eta=0.1)
 
 sampled_trajectory = hp.sample(max_time=11.)
 ```
-If I want to be technically a lot of problems exist with this implementation due to the optimization technique, 
-but I'm not able to work on this project at the moment. 
+ 

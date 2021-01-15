@@ -6,8 +6,7 @@ The tool is written using TensorFlow, using automatic differentiation, along wit
 static typing to catch bugs. A multivariate Hawkes process with static base rate and a sum of
 exponential triggering kernels is the only model currently implemented. 
 This work is the composition of a few papers along with previous implementations
-of graphical models. Currently this is for unsupervised data, 
-the implementation for labels is not finished.
+of graphical models.
 
 # Install
 

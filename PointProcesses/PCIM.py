@@ -10,7 +10,8 @@
     for picking the counts all the time
 
     Giving up on this for a little while, I think Hawkes process might be a bit
-    better
+    better. I guess the problem is either implmenting this or implementing EM for the 
+    Hawkes process. Both are fairly challenging but possible with TF.
 
 """
 from abc import ABCMeta, abstractmethod

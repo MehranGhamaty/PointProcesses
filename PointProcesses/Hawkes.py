@@ -5,6 +5,8 @@
     Assumes that there is a tensorflow session executing eagerly.
 
     Do not try to sample and perform gradient descent at the same time. 
+    The inference matrix has no restrictions and this would be a
+    Heterogenious Poisson Process. It just wasn't labeled.
 """
 from typing import List
 from numpy import inf

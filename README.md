@@ -38,7 +38,7 @@ fields = {
 trajectory = Trajectory(fields, tau=0.1)
 ```
 Replacing 0.1 with ```np.inf``` will have the process learn in continuous time, which generates a higher log likihood with lower computational cost. 
-Although results are dataset dependent.
+Although results are vary on the source of the data.
 
 An example for creating a Hawkes process, estimating parameters, and sampling
 can be seen below.

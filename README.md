@@ -32,7 +32,7 @@ label_set = tf.convert_to_tensor([0, 1], dtype=tf.int32)
 times = tf.convert_to_tensor([1., 2.5, 5, 9.], dtype=tf.float32)
 labels = tf.convert_to_tensor([0, 1, 0, 1], dtype=tf.int32)
 fields = {
-    "times": Field(values=times, continuous=True, space=(0., 10.)),
+    "times": Field(values=times, continuous=True, space=(0., 11.)),
     "labels": Field(values=labels, continuous=False, space=label_set)
 }
 trajectory = Trajectory(fields, tau=0.1)

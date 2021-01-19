@@ -53,3 +53,5 @@ hp.gradient_descent_full(trajectory, eta=0.1)
 sampled_trajectory = hp.sample(max_time=11.)
 ```
 
+Unfortunately GD cannot properly recover true parameters when learning from a simple model.
+EM must be implemented to make this actually functional.

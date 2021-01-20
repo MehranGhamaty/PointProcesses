@@ -54,4 +54,4 @@ sampled_trajectory = hp.sample(max_time=11.)
 ```
 
 Unfortunately GD cannot properly recover true parameters when learning from a simple model.
-EM should be implemented to for this to be actually functional.
+EM should be implemented for this to be actually functional.

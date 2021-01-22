@@ -1,6 +1,6 @@
 # Description
 
-It's a fire extinguisher.
+It's a fire extinguisher or a light saber, depending on your perspective.
 
 The python package is written to explore point processes, specifically anytime versions
 of temporal point process.

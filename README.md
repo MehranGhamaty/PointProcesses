@@ -1,6 +1,5 @@
 # Description
 
-This is suppose to be a fire extinguisher. I guess now I know why statisticians want to be called data scientists.
 
 The python package is written to explore point processes, specifically anytime versions
 of temporal point process.

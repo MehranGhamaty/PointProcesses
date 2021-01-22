@@ -1,5 +1,7 @@
 # Description
 
+It's a fire extinguisher.
+
 The python package is written to explore point processes, specifically anytime versions
 of temporal point process.
 The tool is written with TensorFlow's automatic differentiation, along with

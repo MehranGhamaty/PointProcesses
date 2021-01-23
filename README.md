@@ -10,6 +10,7 @@ exponential triggering kernels is the only model currently implemented.
 This work is the composition of a few papers along with previous implementations
 of graphical models.
 
+This is a form of unsupervised learning, remember its always easier with the labels.
 
 # Install
 

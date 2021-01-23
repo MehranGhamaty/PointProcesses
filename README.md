@@ -60,3 +60,4 @@ Unfortunately GD cannot properly recover true parameters when learning from a si
 EM should be implemented for this to be actually functional.
 
 More examples can be found in the notebooks.
+9-10-11

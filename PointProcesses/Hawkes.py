@@ -5,6 +5,7 @@
     Assumes that there is a tensorflow session executing eagerly.
 
     Do not try to sample and perform gradient descent at the same time. 
+    (You can if you know what your doing).
     
     A sub-class of heterogeneous Poisson Process (there are more names for this type of process). 
     A more flexible version of a homogeneous Poisson Process for everybody who is confused.

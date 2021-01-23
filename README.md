@@ -1,8 +1,7 @@
 # Description
 
 
-The python package is written to explore point processes, specifically anytime versions
-of temporal point process.
+The python package is written to get publications from point processes.
 The tool is written with TensorFlow's automatic differentiation, along with
 strict typing to catch bugs 
 (which means if a function asks for something specifically only that type of object can be provided as a parameter).

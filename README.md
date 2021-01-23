@@ -10,11 +10,9 @@ exponential triggering kernels is the only model currently implemented.
 This work is the composition of a few papers along with previous implementations
 of graphical models.
 
-This is a form of unsupervised learning, remember its always easier with the labels. 
-I know its confusing since I use the word "label" in the example.
-It depends on your defintion. This is because each "label" in the example below actually
-represents a statistically (given the rate) independent trajectory. 
-
+This is a form of unsupervised learning.
+I use the word "label" in the example, but it depends on your how you are looking
+at the problem.
 
 # Install
 

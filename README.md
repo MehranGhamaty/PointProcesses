@@ -12,7 +12,9 @@ of graphical models.
 
 This is a form of unsupervised learning, remember its always easier with the labels. 
 I know its confusing since I use the word "label" in the example.
-It depends on your defintion.
+It depends on your defintion. This is because each "label" in the example below actually
+represents a statistically (given the rate) independent trajectory. 
+
 
 # Install
 

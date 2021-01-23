@@ -12,6 +12,8 @@ of graphical models.
 
 This is a form of unsupervised learning.
 I use the word "label" in the example, but this depends on the definition of label.
+From a process view label is not the appropriate word.
+From a machine learning view label could be viewed as the appropriate word.
 
 # Install
 

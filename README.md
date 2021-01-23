@@ -11,8 +11,7 @@ This work is the composition of a few papers along with previous implementations
 of graphical models.
 
 This is a form of unsupervised learning.
-I use the word "label" in the example, but it depends on your how you are looking
-at the problem.
+I use the word "label" in the example, but this depends on the definition of label.
 
 # Install
 

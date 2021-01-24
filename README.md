@@ -7,13 +7,6 @@ strict typing to catch bugs
 (which means if a function asks for something specifically only that type of object can be provided as a parameter).
  A multivariate Hawkes process with non-variable base rate and a sum of
 exponential triggering kernels is the only model currently implemented. 
-This work is the composition of a few papers along with previous implementations
-of graphical models.
-
-This is a form of unsupervised learning.
-I use the word "label" in the example, but this depends on the definition of label.
-From a process perspective label is not the appropriate word.
-From a machine learning perspective label could be viewed as the appropriate word.
 
 # Install
 

@@ -23,7 +23,7 @@ from DataStores.Trajectory import Trajectory, TimeSlice
 class Hawkes(PointProcess):
     """
        A general multivariate Hawkes process that uses a sum of exponentials
-       Non-modular kernel. Some methods manage state, be aware.
+       non-modular kernel. Some methods manage state, be aware.
 
        Works a lot better if mus and betas are approximately correct,
        use the set params function to initialize them reasonably.

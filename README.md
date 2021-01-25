@@ -8,7 +8,7 @@ strict typing to catch bugs
  A multivariate Hawkes process with non-variable base rate and a sum of
 exponential triggering kernels is the only model currently implemented. 
 
-One of the papers that this work was attempting verify was a Hawkes process estimating the rate at which patients enter and exit a hospital. This is important for scheduling avaliability of beds.
+One of the papers that this work was attempting verify was a Hawkes process estimating the rate at which patients enter or exit a hospital. This is important for scheduling avaliability of beds.
 
 # Install
 

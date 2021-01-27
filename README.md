@@ -56,7 +56,7 @@ sampled_trajectory = hp.sample(max_time=12.)
 
 Unfortunately GD cannot properly recover true parameters when learning from a simple model.
 EM should be implemented for this to be actually functional. EM can be implemented with a Hawkes process
-in linear time. 
+in linear time (same with the other processes that are started).
 
 More examples can be found in the notebooks.
 

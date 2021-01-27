@@ -57,6 +57,7 @@ Unfortunately GD cannot properly recover true parameters when learning from a si
 EM should be implemented for this to be actually functional. EM can be implemented with a Hawkes process
 in linear time (same with the other processes that are started). 
 With advanced techniques the capacity of this model can be greatly increased.
+Inference is extremely inexpesive and perfect for low-power devices where matrix multiplication might be too expensive.
 
 It provides an accurate prior for many real world interactions, while providing 
 interpretability, stability, and many other features that make it favorable in many real world applications.

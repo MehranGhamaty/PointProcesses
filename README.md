@@ -53,12 +53,4 @@ hp.gradient_descent_full(trajectory, eta=0.1)
 
 sampled_trajectory = hp.sample(max_time=12.)
 ```
-Unfortunately GD cannot properly recover true parameters when learning from a simple model.
-EM should be implemented for this to be actually functional. EM can be implemented with a Hawkes process
-in linear time (same with the other processes that are started). 
-With advanced techniques the capacity of this model can be greatly increased.
-Inference is extremely inexpesive and perfect for low-power devices where matrix multiplication might be too expensive.
 
-It provides an accurate prior for many real world interactions, while providing 
-interpretability, stability, and many other features that make it favorable in many real world applications.
-More examples can be found in the notebooks.

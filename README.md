@@ -62,5 +62,3 @@ Inference is extremely inexpesive and perfect for low-power devices where matrix
 It provides an accurate prior for many real world interactions, while providing 
 interpretability, stability, and many other features that make it favorable in many real world applications.
 More examples can be found in the notebooks.
-
-Unfortunetely I do not have the funds to continue this project. 

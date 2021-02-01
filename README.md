@@ -8,8 +8,6 @@ strict typing to catch bugs
  A multivariate Hawkes process with non-variable base rate and a sum of
 exponential triggering kernels is the only model currently implemented. 
 
-A map for unringing.
-
 # Install
 
 To install run

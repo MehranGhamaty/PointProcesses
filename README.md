@@ -27,9 +27,9 @@ tf.enable_eager_execution()
 
 from DataStores.Trajectory import Trajectory, Field
 
-label_set = tf([0, 1], dtype=tf.int32)
-times = tf([1., 2.5, 5, 9.], dtype=tf.float32)
-labels = tf([0, 1, 0, 1], dtype=tf.int32)
+label_set = tf.convert_to_tensor([0, 1], dtype=tf.int32)
+times = tf.convert_to_tensor([1., 2.5, 5, 9.], dtype=tf.float32)
+labels = tf.convert_to_tensor([0, 1, 0, 1], dtype=tf.int32)
 fields = {
     "times": Field(values=times, continuous=True, space=(0., 11.)),
     "labels": Field(values=labels, continuous=False, space=label_set)

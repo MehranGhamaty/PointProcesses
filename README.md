@@ -51,4 +51,4 @@ hp.gradient_descent_full(trajectory, eta=0.1)
 
 sampled_trajectory = hp.sample(max_time=12.)
 ```
-Although if you are distributing across multiple computers make sure to only sample from the most recent parameters, otherwise its totally pointless and defeats the purpose of learning.
+Although if you are distributing across multiple computers make sure to only sample from the most recent set of parameters, otherwise its totally pointless and defeats the purpose of learning.

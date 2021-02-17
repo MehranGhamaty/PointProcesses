@@ -8,6 +8,8 @@ strict typing to catch bugs
  A multivariate Hawkes process with non-variable base rate and a sum of
 exponential triggering kernels is the only model currently implemented. 
 
+This doesn't work on windows 10.
+
 # Install
 
 To install run

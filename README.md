@@ -2,7 +2,7 @@
 
 
 The python package is written to get publications from point processes.
-The toolkit is written with TensorFlow's automatic differentiation, along with
+The toolkit is written with TensorFlow's differentiation, along with
 strict typing to catch bugs 
 (which means if a function asks for something specifically only that type of object can be provided as a parameter).
  A multivariate Hawkes process with non-variable base rate and a sum of

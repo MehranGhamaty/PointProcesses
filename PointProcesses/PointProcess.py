@@ -21,7 +21,7 @@ class PointProcess(metaclass=ABCMeta):
         It assumes there are nlabels
 
         How do I get a mapping from this to a multiset of labels?
-        The Hawkes process isn't using this actually so I don't
+        The Hawkes process isn't using this; I don't
         have to worry about it.
 
         Keeps track of the total time and number of events per label

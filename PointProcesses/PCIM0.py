@@ -26,7 +26,7 @@ import tensorflow as tf
 import numpy as np
 
 from PointProcess import PointProcess
-from HomogeneousPoissonProcess import HomogeneousPoissonProcess
+from PoissonProcess import PoissonProcess
 
 from DataStores.Trajectory import Trajectory, TimeSlice
 
@@ -69,7 +69,7 @@ class DTNode:
         self.__basis_function: Optional[BasisFunction] = None
 
         #okay now what?
-        self.__distribution: PointProcess = HomogeneousPoissonProcess(len(self.__variables), **kwargs)
+        self.__distribution: PointProcess = PoissonProcess(len(self.__variables), **kwargs)
         self.__done: bool = False
         self.__branches: Optional[List[DTNode]] = None
 
@@ -80,7 +80,7 @@ class DTNode:
         self.__bank = BasisFunctionBank(self.__variables_and_counts, self.__time_windows)
         self.__time_slices = list()
         self.__basis_function = None
-        self.__distribution = HomogeneousPoissonProcess(len(self.__variables))
+        self.__distribution = PoissonProcess(len(self.__variables))
         self.__done = False
         self.__branches = None
 

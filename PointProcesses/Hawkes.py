@@ -7,8 +7,8 @@
     Do not try to sample and perform gradient descent at the same time. 
     (You can if you know what your doing).
     
-    A sub-class of heterogeneous Poisson Process (there are more names for this type of process). 
-    A more flexible version of a homogeneous Poisson Process for everybody who is confused.
+    A extension of heterogeneous Poisson Process (there are more names for this type of process). 
+    A more flexible version of a Poisson Process for everybody who is confused.
     It wasn't labeled.
 """
 from typing import List
@@ -51,7 +51,7 @@ class Hawkes(PointProcess):
         )
 
         # I need better ways of initializing these....
-        # mu should make sure everthing is always positive....
+        # mu should make sure everthing is always above zero....
         # constraints..... I really feel like using the lagrangian would be
         # better than other other methods I've seen.....
 

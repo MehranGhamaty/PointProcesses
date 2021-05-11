@@ -1,5 +1,5 @@
 """
-    This is a class for superposition of homogeneous Poisson Process.
+    This is a class for superposition of Poisson Process.
     
 """
 
@@ -9,9 +9,9 @@ import tensorflow as tf
 from PointProcesses.PointProcess import PointProcess
 from Trajectory.Trajectory import Trajectory, TimeSlice, Field
 
-class HomogeneousPoissonProcess(PointProcess):
+class PoissonProcess(PointProcess):
     """
-        A superposition of Homogeneous Poisson Processes
+        A superposition of Poisson Processes
         written for online learning.
 
         No prior (the advantage of online learning comes from large datasets
@@ -20,7 +20,7 @@ class HomogeneousPoissonProcess(PointProcess):
     """
 
     def __init__(self, nlabels: int, max_memory: float = np.inf):
-        super(HomogeneousPoissonProcess, self).__init__(nlabels, max_memory)
+        super(PoissonProcess, self).__init__(nlabels, max_memory)
         self.__intensities = tf.zeros((nlabels,), dtype=tf.dtypes.float32)
         self.__num_events = tf.zeros((nlabels,), dtype=tf.dtypes.float32)
 
@@ -58,7 +58,7 @@ class HomogeneousPoissonProcess(PointProcess):
         """
             Resets the internal state of the intensities
         """
-        nlabels = super(HomogeneousPoissonProcess, self).nlabels
+        nlabels = super(PoissonProcess, self).nlabels
         self.__intensities = tf.zeros((nlabels,), dtype=tf.dtypes.float32)
         self.__num_events = tf.zeros((nlabels,), dtype=tf.dtypes.float32)
         self.__total_time = 0
@@ -78,7 +78,8 @@ class HomogeneousPoissonProcess(PointProcess):
         """
             Adds the time slice to the queue and re-estimates parameters
         """
-        super(HomogeneousPoissonProcess, self)._add_to_queue(time_slice)
+        super(
+            PoissonProcess, self)._add_to_queue(time_slice)
 
         while self.__eventqueue[0].time > time_slice.time - self.__max_memory:
             self.__total_time -= self.__eventqueue[0].deltat

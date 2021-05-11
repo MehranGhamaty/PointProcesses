@@ -8,7 +8,7 @@
     (You can if you know what your doing).
     
     A extension of heterogeneous Poisson Process (there are more names for this type of process). 
-    A more flexible version of a Poisson Process for everybody who is confused.
+    A version of a Poisson Process with more capacity.
     It wasn't labeled.
 """
 from typing import List

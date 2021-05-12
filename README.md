@@ -9,12 +9,11 @@ strict typing to catch bugs
 exponential triggering kernels is the only model currently implemented. 
 
 # Install
-
-To install run
-
 ```
 python setup.py install
 ```
+
+# Examples
 
 An example for creating a Trajectory with 0.1 units as the discretization amount
 is given below: 
@@ -36,6 +35,7 @@ fields = {
 }
 trajectory = Trajectory(fields, tau=0.1)
 ```
+
 Putting ```np.inf``` instead of ```0.1```  causes the process learn in continuous time, which can result in a higher log likihood with lower computational cost.
 
 An example for creating a Hawkes process, finding parameters, and sampling

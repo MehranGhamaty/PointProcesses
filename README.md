@@ -36,7 +36,7 @@ fields = {
 }
 trajectory = Trajectory(fields, tau=0.1)
 ```
-Replacing 0.1 with ```np.inf``` will have the process learn in continuous time, which generates a higher log likihood with lower computational cost, in specific situations.
+Putting ```np.inf``` instead of ```0.1```  causes the process learn in continuous time, which can result in a higher log likihood with lower computational cost.
 
 An example for creating a Hawkes process, finding parameters, and sampling
 can be seen below.
@@ -51,4 +51,3 @@ hp.gradient_descent_full(trajectory, eta=0.1)
 
 sampled_trajectory = hp.sample(max_time=12.)
 ```
-Although if you are distributing across multiple computers make sure to only sample from the most recent set of parameters, otherwise it's totally pointless and defeats the purpose of learning (exceptions exist).

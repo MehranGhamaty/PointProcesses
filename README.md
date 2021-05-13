@@ -35,7 +35,7 @@ fields = {
 trajectory = Trajectory(fields, tau=0.1)
 ```
 
-Putting ```np.inf``` instead of ```0.1```  causes the process learn in continuous time, which can result in a higher log likihood with lower computational cost.
+Replace ```0.1```   with ```np.inf```  to make the process learn in continuous time, which can result in a higher log likihood with lower computational cost.
 
 # Learning and Sampling
 

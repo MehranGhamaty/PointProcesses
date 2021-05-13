@@ -7,9 +7,6 @@
     Do not try to sample and perform gradient descent at the same time. 
     (You can if you know what your doing).
     
-    A extension of heterogeneous Poisson Process (there are more names for this type of process). 
-    A version of a Poisson Process with more capacity.
-    It wasn't labeled.
 """
 from typing import List
 from numpy import inf
@@ -23,17 +20,16 @@ from DataStores.Trajectory import Trajectory, TimeSlice
 class Hawkes(PointProcess):
     """
        A general multivariate Hawkes process that uses a sum of exponentials
-       non-modular kernel. Some methods manage state, be aware.
+       non-modular kernel. Methods manage state, be aware.
 
        Works a lot better if mus and betas are approximately correct,
        use the set params function to initialize them reasonably.
 
-       This can be done with the set params method, but I really
-       should write my own initialization method that takes a
-       sample trajectory.
+       This can be done with the set params method, but
+       initialization method that takes a sample trajectory should be written.
 
        Each set of nlabels gets its own matrix, this is a good way
-       of representing mutiple discrete attributes.
+       of representing mutiple unconnected attributes.
 
        Assumes labels are from the space [0, nlabels)
     """
@@ -52,9 +48,8 @@ class Hawkes(PointProcess):
 
         # I need better ways of initializing these....
         # mu should make sure everthing is always above zero....
-        # constraints..... I really feel like using the lagrangian would be
+        # constraints..... using the lagrangian would be
         # better than other other methods I've seen.....
-
         self.__weights: tf.Variable = tf.Variable(
             initial_value=tf.random.uniform((self.__nlabels,
                                              self.__nlabels, self.__nkernels),

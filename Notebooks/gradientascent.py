@@ -1,6 +1,6 @@
 """
 
-A test using GD
+A test using GA
 
 """
 

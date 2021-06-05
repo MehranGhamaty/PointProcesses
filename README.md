@@ -48,7 +48,9 @@ From PointProcesses.Hawkes import Hawkes
 exponential_params = [1, 3, 5]
 hp = Hawkes(len(label_set), exponential_params)
 
-hp.gradient_descent_full(trajectory, eta=0.1)
+hp.gradient_ascent_full(trajectory, eta=0.1)
 
 sampled_trajectory = hp.sample(max_time=12.)
 ```
+Learning from real data can be accomplished 
+simply.

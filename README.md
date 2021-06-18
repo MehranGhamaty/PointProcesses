@@ -53,4 +53,4 @@ hp.gradient_ascent_full(trajectory, eta=0.1)
 sampled_trajectory = hp.sample(max_time=12.)
 ```
 Learning from real data can be accomplished 
-simply.
+simply. I wouldn't use this in production, email me if you wish to utilize these techniques.
